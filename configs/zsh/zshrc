@@ -124,6 +124,7 @@ alias gms="git merge --skip"
 alias gma="git merge --abort"
 alias gre="git restore"
 alias grs="git restore --staged"
+alias heat="rm"
 
 # zsh
 alias zshrc="$EDITOR $HOME/.zshrc"
