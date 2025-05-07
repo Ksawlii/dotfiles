@@ -56,12 +56,11 @@ require("lazy").setup({
     { "hrsh7th/cmp-buffer" },
     { "hrsh7th/cmp-path" },
     { "saadparwaiz1/cmp_luasnip" },
-    { "L3MON4D3/LuaSnip" },
     { "neovim/nvim-lspconfig" },
     { "williamboman/mason.nvim" },
     { "williamboman/mason-lspconfig.nvim" },
     { "hrsh7th/cmp-emoji" },
-    { "rafamadriz/friendly-snippets" },
+    { "Ksawlii/friendly-snippets" },
     { "onsails/lspkind.nvim" },
     { "windwp/nvim-autopairs" },
     { "nvim-telescope/telescope.nvim", dependencies = { "nvim-lua/plenary.nvim" } },
@@ -350,6 +349,3 @@ vim.opt.wrap = true
 vim.opt.whichwrap:append "<>[]hl"
 vim.opt.ignorecase = true
 vim.opt.smartcase = false
-
--- Load (shit) more lua Files
-require("snippets.shell")
