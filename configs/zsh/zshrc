@@ -151,6 +151,10 @@ solvo() {
     done
 }
 
+solvo-vid() {
+    timg -V "$HOME/.config/zsh/vids/solvo.webm"
+}
+
 # Fastfetch
 if "CMD_CHECK" "fastfetch"; then
   fastfetch  
