@@ -1,21 +1,11 @@
 #!/bin/bash
 set -e
 
-# Variable(s)
-R="\e[0m"
+if [ "$EUID" -eq 0 ]; then
+  error "This script should not be run as root. Please run it as a regular user."
+fi
 
-# Commands (ig ;p)
-ask_ny() {
-  while true; do
-    read -p "$1 (y/n): " ny
-    case $ny in
-      [Yy]* ) return 0;;
-      [Nn]* ) return 1;;
-          * ) echo -e "Please answer y or n.";;
-    esac
-  done
-}
-
+# Commands (1)
 cmd_chk() {
   command -v "$1" &>/dev/null
 }
@@ -25,6 +15,29 @@ error() {
 
   echo -e "${RED}E: $1${R}" >&2
   exit 1
+}
+
+if [ -f "/etc/doas.conf" ] && "cmd_chk" "doas"; then
+  ROOT="doas"
+elif "cmd_chk" "sudo"; then
+  ROOT="sudo"
+else
+  error "Doas and sudo not found. Install doas or sudo!"
+fi
+
+# Variable(s)
+R="\e[0m"
+
+# Commands (2)
+ask_ny() {
+  while true; do
+    read -p "$1 (y/n): " ny
+    case $ny in
+      [Yy]* ) return 0;;
+      [Nn]* ) return 1;;
+          * ) echo -e "Please answer y or n.";;
+    esac
+  done
 }
 
 warning() {
@@ -37,17 +50,19 @@ info() {
   echo -e "I: $1" >&2
 }
 
-if [ "$EUID" -eq 0 ]; then
-  error "This script should not be run as root. Please run it as a regular user."
-fi
+unmask() {
+  local I="${1}/${2} ~amd64"
+  local PCK_KEYWORDS="/etc/portage/package.accept_keywords"
 
-if [ -f "/etc/doas.conf" ] && "cmd_chk" "doas"; then
-  ROOT="doas"
-elif "cmd_chk" "sudo"; then
-  ROOT="sudo"
-else
-  error "Doas and sudo not found. Install doas or sudo!"
-fi
+  [ ! -d "$PCK_KEYWORDS" ] && "$ROOT" mkdir -p "$PCK_KEYWORDS"
+
+  if ! grep -Fxq "$I" "$PCK_KEYWORDS/$1" 2>/dev/null; then
+    if [ ! -f "$PCK_KEYWORDS/$1" ]; then
+      "$ROOT" touch "$PCK_KEYWORDS/$1"
+    fi
+    echo "$I" | "$ROOT" tee -a "$PCK_KEYWORDS/$1" > /dev/null
+  fi
+}
 
 if grep -q "gentoo" "/etc/os-release"; then
   echo -e ""
@@ -56,11 +71,23 @@ if grep -q "gentoo" "/etc/os-release"; then
   if ask_ny "Do you want to install dependencies (very recommended)?"; then 
     "$ROOT" emerge -navq eselect-repository
     "$ROOT" eselect repository enable kzd guru steam-overlay
-    "$ROOT" emerge --sync
+    "$ROOT" emerge -q --sync
+    TO_UNMASK=(
+      media-gfx/timg
+      gui-apps/wlogout
+      x11-apps/xcur2png
+      app-misc/nwg-look
+      gui-apps/satty
+    )
+    for u in "${TO_UNMASK[@]}"; do
+      CTG="${u%%/*}"
+      PKG="${u##*/}"
+      unmask "$CTG" "$PKG"
+    done
     "$ROOT" emerge -navq \
-            hyprland wlogout waybar rofi neovim xdg-desktop-portal swaybg dunst \
-            dev-python/pipx thunar kitty dev-perl/Gtk2 wl-clipboard swaylock dbus timg \
-            dev-perl/Gtk3 xcur2png nwg-look fastfetch zsh grim slurp satty wlroots xdg-desktop-portal-gtk xdg-desktop-portal-wlr
+            hyprland wlogout waybar rofi neovim xdg-desktop-portal swaybg xdg-desktop-portal-wlr \
+            thunar kitty dev-perl/Gtk2 wl-clipboard swaylock sys-apps/dbus timg dunst \
+            dev-perl/Gtk3 xcur2png nwg-look fastfetch zsh grim slurp satty wlroots xdg-desktop-portal-gtk
   else
     warning "Skipping dependencies installation"
     SKIPPED="1"
