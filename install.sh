@@ -1,8 +1,8 @@
 #!/bin/bash
 set -e
 
-# Unset some variables
-unset SKIPPED NOT_FOUND ROOT
+# Variable(s)
+R="\e[0m"
 
 # Commands (ig ;p)
 ask_ny() {
@@ -11,129 +11,132 @@ ask_ny() {
     case $ny in
       [Yy]* ) return 0;;
       [Nn]* ) return 1;;
-          * ) echo "Please answer y or n.";;
+          * ) echo -e "Please answer y or n.";;
     esac
   done
 }
 
-command_checker() {
+cmd_chk() {
   command -v "$1" &>/dev/null
 }
 
 error() {
-  echo "ERROR: $1" >&2
+  local RED="\e[0;31m"
+
+  echo -e "${RED}E: $1${R}" >&2
   exit 1
 }
 
 warning() {
-  echo "WARNING: $1" >&2
+  local ORANGE="\e[0;33m"
+
+  echo -e "${ORANGE}W: $1${R}" >&2
 }
 
 info() {
-  echo "INFO: $1" >&2
+  echo -e "I: $1" >&2
 }
 
 if [ "$EUID" -eq 0 ]; then
   error "This script should not be run as root. Please run it as a regular user."
 fi
 
-if [ -f "/etc/doas.conf" ] && "command_checker" "doas"; then
+if [ -f "/etc/doas.conf" ] && "cmd_chk" "doas"; then
   ROOT="doas"
-elif "command_checker" "sudo"; then
+elif "cmd_chk" "sudo"; then
   ROOT="sudo"
 else
   error "Doas and sudo not found. Install doas or sudo!"
 fi
 
-warning "Make sure you have $HOME/.config/ and .zsh* backup!"
-sleep 2
-
 if grep -q "gentoo" "/etc/os-release"; then
-  echo ""
+  echo -e ""
   info "Gentoo Linux detected"
-  echo ""
+  echo -e ""
   if ask_ny "Do you want to install dependencies (very recommended)?"; then 
     "$ROOT" emerge -navq eselect-repository
-    "$ROOT" eselect repository enable librewolf kzd guru steam-overlay
+    "$ROOT" eselect repository enable kzd guru steam-overlay
     "$ROOT" emerge --sync
-    "$ROOT" cp -rf "$(pwd)/gentoo/package.accept_keywords/" "/etc/portage/"
-    "$ROOT" cp -rf "$(pwd)/gentoo/package.use/" "/etc/portage/"
     "$ROOT" emerge -navq \
-            hyprland wlogout waybar rofi neovim xdg-desktop-portal swaybg \
-            dev-python/pipx thunar kitty dev-perl/Gtk2 wl-clipboard swaylock \
+            hyprland wlogout waybar rofi neovim xdg-desktop-portal swaybg dunst \
+            dev-python/pipx thunar kitty dev-perl/Gtk2 wl-clipboard swaylock dbus \
             dev-perl/Gtk3 xcur2png nwg-look fastfetch zsh grim slurp satty wlroots xdg-desktop-portal-gtk xdg-desktop-portal-wlr
   else
     warning "Skipping dependencies installation"
     SKIPPED="1"
   fi
+
   if [ -f "/usr/share/wayland-sessions/hyprland.desktop" ]; then
     if ! grep -q "Exec=dbus-run-session Hyprland" /usr/share/wayland-sessions/hyprland.desktop; then
-      echo ""
+      echo -e ""
       info "Patching hyprland.desktop to run with dbus"
-      "$ROOT" patch -p1 -d "/usr/share/wayland-sessions/" < "patches/0001-Run-hyprland-with-dbus.patch"
+      "$ROOT" sed -i "s.Exec\=Hyprland.Exec=dbus-run-session\ Hyprland.g" /usr/share/wayland-sessions/hyprland.desktop
     fi
   else
-    warn "/usr/share/wayland-sessions/hyprland.desktop not found. Skipping 0001-Run-hyprland-with-dbus.patch"
+    warn "/usr/share/wayland-sessions/hyprland.desktop not found."
   fi
 
 elif grep -q "arch" "/etc/os-release"; then
-  echo ""
+  echo -e ""
   info "Arch Linux detected"
-  echo ""
+  echo -e ""
   # Enable multilib if it's not already enabled
   if ! grep -q '^\[multilib\]' /etc/pacman.conf; then
     info "Enabling multilib repository..."
     echo -e "\n[multilib]\nInclude = /etc/pacman.d/mirrorlist" | "$ROOT" tee -a /etc/pacman.conf
     "$ROOT" pacman -Syu
   fi
-  if ! "command_checker" "yay"; then
-    echo ""
+  if ! "cmd_chk" "yay"; then
+    echo -e ""
     info "Yay not installed. Installing yay (AUR helper)..."
-    "$ROOT" pacman -Syu --needed base-devel git
+    "$ROOT" pacman -S --needed base-devel git
     git clone "https://aur.archlinux.org/yay.git" "$HOME/.yay"
     cd "$HOME/.yay"
     makepkg -si
     rm -rf "$HOME/.yay"
   fi
    
-  echo ""
+  echo -e ""
   if ask_ny "Do you want to install dependencies (very recommended)?"; then
-    yay -Syu --noconfirm --needed \
+    yay -Syyuu --noconfirm --needed \
     hyprland waybar rofi python-pipx kitty xdg-desktop-portal neovim \
     gtk2 gtk3 nwg-look fastfetch zsh grim satty xdg-desktop-portal-gtk swaybg thunar \
-    xcur2png gsettings-qt slurp wlogout wl-clipboard xdg-desktop-portal-wlr
+    xcur2png gsettings-qt slurp wlogout wl-clipboard xdg-desktop-portal-wlr dunst dbus
   else
     warning "Skipping dependencies installation"
     SKIPPED="1"
   fi
+
 else
   error "Your distro is not supported"
 fi
 
 # Oh My Zsh
 if [ ! "$SKIPPED" = "1" ]; then
-  echo ""
+  echo -e ""
   unset SKIPPED
 fi
 if [ ! -d "$HOME/.oh-my-zsh/" ]; then
   info "Oh My Zsh Not found. Installing..."
   sh -c "$(curl -fsSL https://raw.githubusercontent.com/ohmyzsh/ohmyzsh/master/tools/install.sh)" &> /dev/null
 fi
+
 # Oh My Zsh Plugins
-if [ ! -d "$HOME/.oh-my-zsh/custom/plugins/zsh-completions/" ]; then
-  info "zsh-completions plugin not found. Installing..."
-  git clone "https://github.com/zsh-users/zsh-completions" "$HOME/.oh-my-zsh/custom/plugins/zsh-completions" &> /dev/null
-fi
-if [ ! -d "$HOME/.oh-my-zsh/custom/plugins/zsh-syntax-highlighting/" ]; then
-  info "zsh-syntax-highlighting plugin not found. Installing..."
-  git clone "https://github.com/zsh-users/zsh-syntax-highlighting" "$HOME/.oh-my-zsh/custom/plugins/zsh-syntax-highlighting" &> /dev/null
-fi
-if [ ! -d "$HOME/.oh-my-zsh/custom/plugins/zsh-history-substring-search/" ]; then
-  info "zsh-history-substring-search plugin not found. Installing..."
-  git clone "https://github.com/zsh-users/zsh-history-substring-search" "$HOME/.oh-my-zsh/custom/plugins/zsh-history-substring-search" &> /dev/null
-fi
+PLUGINS=(
+  zsh-completions
+  zsh-syntax-highlighting
+  zsh-history-substring-search
+)
+
+for p in "${PLUGINS[@]}"; do
+  if [ ! -d "$HOME/.oh-my-zsh/custom/plugins/$p" ]; then 
+      info "$p plugin not found. Installing..."
+      git clone -q "https://github.com/zsh-users/$p" "$HOME/.oh-my-zsh/custom/plugins/$p"
+  fi
+done
+
 # Oh My Posh
-if ! "command_checker" "oh-my-posh"; then
+if ! "cmd_chk" "oh-my-posh"; then
   info "Oh My Posh Not Found. Installing..."
   if [ ! -d "$HOME/.local/bin/" ]; then
     mkdir -p "$HOME/.local/bin/"
@@ -141,40 +144,40 @@ if ! "command_checker" "oh-my-posh"; then
   curl -s https://ohmyposh.dev/install.sh | bash -s -- -d "$HOME/.local/bin/" &> /dev/null
   NOT_FOUND="1"
 fi
-if [ ! "$NOT_FOUND" = "1" ]; then
-  echo ""
+
+if [ "$NOT_FOUND" != "1" ]; then
+  echo -e ""
   unset NOT_FOUND
 fi
-echo "Copying dotfiles files"
-sleep 1
-if [ ! -d "$(pwd)/.config" ]; then
-  mv "$(pwd)/configs" ".config"
+
+if [ ! -d "$HOME/.config/" ]; then
+    mkdir -p "$HOME/.config/" 
 fi
-if [ -d "$(pwd)/.config" ]; then
-  echo "Copying .config folder"
-  cp -rf "$(pwd)/.config" "$HOME/"
-else
-  if [ -d "$(pwd)/.config" ]; then
-    mv "$(pwd)/.config" "$(pwd)/configs"
-  fi
-  error ".config folder not found"
-fi
-if [ -f "$(pwd)/.config/zsh/zshrc" ]; then
-  echo "Copying zshrc"
-  cp -rf "$(pwd)/.config/zsh/zshrc" "$HOME/.zshrc"
-else
-  if [ -d "$(pwd)/.config" ]; then
-    mv "$(pwd)/.config" "$(pwd)/configs"
-  fi
-  error "zshrc not found!"
-fi
-if [ -d "$(pwd)/.config" ]; then
-  mv "$(pwd)/.config" "$(pwd)/configs"
-fi
+
+# Dotfiles
+echo -e "Copying dotfiles files"
 sleep 1
 
+FILES=(configs/*)
+
+for f in "${FILES[@]}"; do
+  if [ -d "$HOME/.config/$f" ]; then
+      mkdir -p "$HOME/.dotfiles-backup"
+      mv -f "$HOME/.config/$f"
+  fi
+
+  info "Copying $f"
+  cp -rfa "$f" "$HOME/.config/"
+done
+
+if [ -f "$HOME/.zshrc" ]; then
+    [ ! -d "$HOME/.dotfiles-backup" ] && mkdir -p "$HOME/.dotfiles-backup"
+    mv -f "$HOME/.zshrc" "$HOME/.dotfiles-backup/zshrc"
+fi
+mv -f "$HOME/.config/zsh/zshrc" "$HOME/.zshrc"
+
 # Nerd Fonts
-echo ""
+echo -e ""
 if [ ! -d "$HOME/nerd-fonts/" ]; then
   if ask_ny "Do you want Nerd Fonts (Recommended) (8GB)?"; then
     git clone -j$(nproc --all) --depth=1 "https://github.com/ryanoasis/nerd-fonts.git" "$HOME/nerd-fonts"
@@ -191,5 +194,5 @@ if [ ! -d "$HOME/nerd-fonts/" ]; then
   fi
 fi
 sleep 1
-echo "Done!"
+echo -e "Done!"
 exit 0
