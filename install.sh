@@ -189,8 +189,8 @@ FILES=(configs/*)
 
 for f in "${FILES[@]}"; do
   if [ -d "$HOME/.config/$f" ]; then
-      mkdir -p "$HOME/.dotfiles-backup"
-      mv -f "$HOME/.config/$f"
+    mkdir -p "$HOME/.dotfiles-backup"
+    mv -f "$HOME/.config/$f" "$HOME/.dotfiles-backup/"
   fi
 
   info "Copying $f"
@@ -198,8 +198,8 @@ for f in "${FILES[@]}"; do
 done
 
 if [ -f "$HOME/.zshrc" ]; then
-    [ ! -d "$HOME/.dotfiles-backup" ] && mkdir -p "$HOME/.dotfiles-backup"
-    mv -f "$HOME/.zshrc" "$HOME/.dotfiles-backup/zshrc"
+  [ ! -d "$HOME/.dotfiles-backup" ] && mkdir -p "$HOME/.dotfiles-backup"
+  mv -f "$HOME/.zshrc" "$HOME/.dotfiles-backup/zshrc"
 fi
 mv -f "$HOME/.config/zsh/zshrc" "$HOME/.zshrc"
 
