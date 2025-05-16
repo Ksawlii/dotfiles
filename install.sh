@@ -64,35 +64,50 @@ unmask() {
   fi
 }
 
-if grep -q "gentoo" "/etc/os-release"; then
-  echo -e ""
-  info "Gentoo Linux detected"
-  echo -e ""
-  if ask_ny "Do you want to install dependencies (very recommended)?"; then 
+gentoo(){
+  local TO_UNMASK=( media-gfx/timg gui-apps/wlogout
+                    x11-apps/xcur2png app-misc/nwg-look
+                    gui-apps/satty gui-apps/gtklock gui-libs/gtk-session-lock )
+  local DEPS=( hyprland wlogout waybar rofi neovim xdg-desktop-portal swaybg
+               xdg-desktop-portal-wlr thunar kitty dev-perl/Gtk2 wl-clipboard
+               sys-apps/dbus timg dunst gtklock dev-perl/Gtk3 xcur2png nwg-look fastfetch
+               zsh grim slurp satty wlroots xdg-desktop-portal-gtk )
+  local REPOS=( kzd guru steam-overlay )
+  local MISSING
+
+  "$ROOT" emerge -q --sync
+
+  if ! "cmd_chk" "equery"; then
+    "$ROOT" emerge -avq app-portage/gentoolkit
+  fi
+
+  if ! eselect "repository" &>/dev/null; then
     "$ROOT" emerge -navq eselect-repository
-    "$ROOT" eselect repository enable kzd guru steam-overlay
-    "$ROOT" emerge -q --sync
-    TO_UNMASK=(
-      media-gfx/timg
-      gui-apps/wlogout
-      x11-apps/xcur2png
-      app-misc/nwg-look
-      gui-apps/satty
-      gui-apps/gtklock
-      gui-libs/gtk-session-lock
-    )
-    for u in "${TO_UNMASK[@]}"; do
-      CTG="${u%%/*}"
-      PKG="${u##*/}"
-      unmask "$CTG" "$PKG"
-    done
-    "$ROOT" emerge -navq \
-            hyprland wlogout waybar rofi neovim xdg-desktop-portal swaybg xdg-desktop-portal-wlr \
-            thunar kitty dev-perl/Gtk2 wl-clipboard sys-apps/dbus timg dunst gtklock \
-            dev-perl/Gtk3 xcur2png nwg-look fastfetch zsh grim slurp satty wlroots xdg-desktop-portal-gtk
+  fi
+
+  for r in "${REPOS[@]}"; do
+    if ! grep -q "^\[$r\]" "/etc/portage/repos.conf/eselect-repo.conf"; then
+      "$ROOT" eselect repository enable "$r"
+    fi
+  done
+
+  for d in "${DEPS[@]}"; do
+    if ! equery list "$d" >/dev/null 2>&1; then
+		  MISSING+=("$d")
+      for u in "${TO_UNMASK[@]}"; do
+        CTG="${u%%/*}"
+        PKG="${u##*/}"
+        if [ "$PKG" = "$d" ]; then
+          unmask "$CTG" "$PKG"
+        fi
+      done
+		fi
+	done
+
+  if [ ${#MISSING[@]} -gt 0 ]; then
+    "$ROOT" emerge -avq ${MISSING[@]}
   else
-    warning "Skipping dependencies installation"
-    SKIPPED="1"
+    info "Nevermind, looks like you got every dependency already"
   fi
 
   if [ -f "/usr/share/wayland-sessions/hyprland.desktop" ]; then
@@ -104,17 +119,19 @@ if grep -q "gentoo" "/etc/os-release"; then
   else
     warn "/usr/share/wayland-sessions/hyprland.desktop not found."
   fi
+}
 
-elif grep -q "arch" "/etc/os-release"; then
-  echo -e ""
-  info "Arch Linux detected"
-  echo -e ""
-  # Enable multilib if it's not already enabled
+ARCH(){
+  local DEPS=( hyprland waybar rofi python-pipx kitty xdg-desktop-portal neovim
+               gtk2 gtk3 nwg-look fastfetch zsh grim satty xdg-desktop-portal-gtk
+               swaybg thunar xcur2png gsettings-qt slurp wlogout wl-clipboard
+               xdg-desktop-portal-wlr dunst dbus timg gtklock )
+  local MISSING="$(pacman -T "${DEPS[@]}" 2>/dev/null)"
+
   if ! grep -q '^\[multilib\]' /etc/pacman.conf; then
-    info "Enabling multilib repository..."
     echo -e "\n[multilib]\nInclude = /etc/pacman.d/mirrorlist" | "$ROOT" tee -a /etc/pacman.conf
-    "$ROOT" pacman -Syu
   fi
+  
   if ! "cmd_chk" "yay"; then
     echo -e ""
     info "Yay not installed. Installing yay (AUR helper)..."
@@ -124,20 +141,33 @@ elif grep -q "arch" "/etc/os-release"; then
     makepkg -si
     rm -rf "$HOME/.yay"
   fi
-   
-  echo -e ""
-  if ask_ny "Do you want to install dependencies (very recommended)?"; then
-    yay -Syyuu --noconfirm --needed \
-    hyprland waybar rofi python-pipx kitty xdg-desktop-portal neovim \
-    gtk2 gtk3 nwg-look fastfetch zsh grim satty xdg-desktop-portal-gtk swaybg thunar \
-    xcur2png gsettings-qt slurp wlogout wl-clipboard xdg-desktop-portal-wlr dunst dbus timg gtklock
-  else
-    warning "Skipping dependencies installation"
-    SKIPPED="1"
+  
+  if [ -n "$MISSING" ]; then
+	  echo -e ""
+    "$ROOT" yay -Syyuu --needed --noconfirm "$MISSING"
+	else
+    info "Nevermind, looks like you got every dependency already"
   fi
+}
 
+if grep -q "gentoo" "/etc/os-release"; then
+  DISTRO(){ gentoo; }
+  DISTRO_NAME="Gentoo"
+elif grep -q "arch" "/etc/os-release"; then
+  DISTRO(){ arch; }
+  DISTRO_NAME="Arch"
 else
   error "Your distro is not supported"
+fi
+
+echo -e ""
+info "$DISTRO_NAME Linux detected"
+echo -e ""
+if ask_ny "Do you want to install dependencies (very recommended)?"; then
+  DISTRO
+else
+  warning "Skipping dependencies installation"
+  SKIPPED="1"
 fi
 
 # Oh My Zsh
