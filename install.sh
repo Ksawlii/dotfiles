@@ -78,6 +78,8 @@ if grep -q "gentoo" "/etc/os-release"; then
       x11-apps/xcur2png
       app-misc/nwg-look
       gui-apps/satty
+      gui-apps/gtklock
+      gui-libs/gtk-session-lock
     )
     for u in "${TO_UNMASK[@]}"; do
       CTG="${u%%/*}"
@@ -86,7 +88,7 @@ if grep -q "gentoo" "/etc/os-release"; then
     done
     "$ROOT" emerge -navq \
             hyprland wlogout waybar rofi neovim xdg-desktop-portal swaybg xdg-desktop-portal-wlr \
-            thunar kitty dev-perl/Gtk2 wl-clipboard swaylock sys-apps/dbus timg dunst \
+            thunar kitty dev-perl/Gtk2 wl-clipboard sys-apps/dbus timg dunst gtklock \
             dev-perl/Gtk3 xcur2png nwg-look fastfetch zsh grim slurp satty wlroots xdg-desktop-portal-gtk
   else
     warning "Skipping dependencies installation"
@@ -128,7 +130,7 @@ elif grep -q "arch" "/etc/os-release"; then
     yay -Syyuu --noconfirm --needed \
     hyprland waybar rofi python-pipx kitty xdg-desktop-portal neovim \
     gtk2 gtk3 nwg-look fastfetch zsh grim satty xdg-desktop-portal-gtk swaybg thunar \
-    xcur2png gsettings-qt slurp wlogout wl-clipboard xdg-desktop-portal-wlr dunst dbus timg
+    xcur2png gsettings-qt slurp wlogout wl-clipboard xdg-desktop-portal-wlr dunst dbus timg gtklock
   else
     warning "Skipping dependencies installation"
     SKIPPED="1"

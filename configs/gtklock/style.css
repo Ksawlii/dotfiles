@@ -1,0 +1,17 @@
+window {
+    background-color: rgba(0, 0, 0, 0.5);
+}
+
+.clock-time {
+    color: white;
+    font-size: 64px;
+    font-family: "JetBrainsMono Nerd Font", sans-serif;
+    font-weight: bold;
+}
+
+.clock-date {
+    color: white;
+    font-size: 20px;
+    margin-top: 10px;
+    font-family: "JetBrainsMono Nerd Font", sans-serif;
+}
