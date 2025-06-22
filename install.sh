@@ -121,7 +121,7 @@ gentoo(){
   fi
 }
 
-ARCH(){
+arch(){
   local DEPS=( hyprland waybar rofi python-pipx kitty xdg-desktop-portal neovim
                gtk2 gtk3 nwg-look fastfetch zsh grim satty xdg-desktop-portal-gtk
                swaybg thunar xcur2png gsettings-qt slurp wlogout wl-clipboard
@@ -175,9 +175,11 @@ if [ ! "$SKIPPED" = "1" ]; then
   echo -e ""
   unset SKIPPED
 fi
-if [ ! -d "$HOME/.oh-my-zsh/" ]; then
-  info "Oh My Zsh Not found. Installing..."
-  sh -c "$(curl -fsSL https://raw.githubusercontent.com/ohmyzsh/ohmyzsh/master/tools/install.sh)" &> /dev/null
+if [ ! -d "$HOME/.oh-my-zsh" ]; then
+  info "Installing Oh My Zsh."
+  export RUNZSH=no
+  export CHSH=no
+  sh -c "$(curl -fsSL https://raw.githubusercontent.com/ohmyzsh/ohmyzsh/master/tools/install.sh)"
 fi
 
 # Oh My Zsh Plugins
@@ -189,14 +191,14 @@ PLUGINS=(
 
 for p in "${PLUGINS[@]}"; do
   if [ ! -d "$HOME/.oh-my-zsh/custom/plugins/$p" ]; then 
-      info "$p plugin not found. Installing..."
+      info "$p plugin not found. Installing."
       git clone -q "https://github.com/zsh-users/$p" "$HOME/.oh-my-zsh/custom/plugins/$p"
   fi
 done
 
 # Oh My Posh
 if ! "cmd_chk" "oh-my-posh"; then
-  info "Oh My Posh Not Found. Installing..."
+  info "Oh My Posh Not Found. Installing."
   if [ ! -d "$HOME/.local/bin/" ]; then
     mkdir -p "$HOME/.local/bin/"
   fi
@@ -214,7 +216,7 @@ if [ ! -d "$HOME/.config/" ]; then
 fi
 
 # Dotfiles
-echo -e "Copying dotfiles files"
+info "Copying dotfiles files"
 sleep 1
 
 FILES=(configs/*)
@@ -225,7 +227,7 @@ for f in "${FILES[@]}"; do
     mv -f "$HOME/.config/$f" "$HOME/.dotfiles-backup/"
   fi
 
-  info "Copying $f"
+  echo "  - Copying $f"
   cp -rfa "$f" "$HOME/.config/"
 done
 
@@ -248,10 +250,12 @@ if [ ! -d "$HOME/nerd-fonts/" ]; then
     wget https://github.com/romkatv/powerlevel10k-media/raw/master/MesloLGS%20NF%20Bold%20Italic.ttf
     mv MesloLGS\ NF\ * "$HOME/.local/share/fonts/NerdFonts/"
     rm -rf "$HOME/nerd-fonts"
-  else
-    warning "Skipping Nerd Fonts installation"
   fi
 fi
 sleep 1
+echo "-------------"
 echo -e "Done!"
+echo "-------------"
+
 exit 0
+
