@@ -71,7 +71,7 @@ gentoo(){
   local DEPS=( hyprland wlogout waybar rofi neovim xdg-desktop-portal swaybg
                xdg-desktop-portal-wlr thunar kitty dev-perl/Gtk2 wl-clipboard
                sys-apps/dbus timg dunst gtklock dev-perl/Gtk3 xcur2png nwg-look fastfetch
-               zsh grim slurp satty wlroots xdg-desktop-portal-gtk )
+               zsh grim slurp satty wlroots xdg-desktop-portal-gtk tmux )
   local REPOS=( kzd guru steam-overlay )
   local MISSING
 
@@ -125,7 +125,7 @@ arch(){
   local DEPS=( hyprland waybar rofi python-pipx kitty xdg-desktop-portal neovim
                gtk2 gtk3 nwg-look fastfetch zsh grim satty xdg-desktop-portal-gtk
                swaybg thunar xcur2png gsettings-qt slurp wlogout wl-clipboard
-               xdg-desktop-portal-wlr dunst dbus timg gtklock )
+               xdg-desktop-portal-wlr dunst dbus timg gtklock tmux )
   local MISSING="$(pacman -T "${DEPS[@]}" 2>/dev/null)"
 
   if ! grep -q '^\[multilib\]' /etc/pacman.conf; then
@@ -236,6 +236,16 @@ if [ -f "$HOME/.zshrc" ]; then
   mv -f "$HOME/.zshrc" "$HOME/.dotfiles-backup/zshrc"
 fi
 mv -f "$HOME/.config/zsh/zshrc" "$HOME/.zshrc"
+
+# TEMP
+# Oh my tmux
+if [ ! -d ".tmux" ]; then
+  info "Oh my tmux not found. Installing."
+  git clone --single-branch https://github.com/gpakosz/.tmux.git ".tmux"
+  mkdir -p "$HOME/.config/tmux"
+  cp ".tmux/.tmux.conf" ".tmux/tmux.conf.local" "$HOME/.config/tmux/tmux.conf"
+  rm -rf ".tmux"
+fi
 
 # Nerd Fonts
 echo -e ""
