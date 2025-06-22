@@ -215,6 +215,17 @@ if [ ! -d "$HOME/.config/" ]; then
     mkdir -p "$HOME/.config/" 
 fi
 
+# TEMP
+# Oh my tmux
+if [ ! -d "$HOME/.config/tmux" ]; then
+  info "Oh my tmux not found. Installing."
+  git clone --single-branch -q https://github.com/gpakosz/.tmux.git ".tmux"
+  [ ! -d "$HOME/.config/tmux" ] && mkdir -p "$HOME/.config/tmux"
+  cp -fa ".tmux/.tmux.conf" ".tmux/.tmux.conf.local" "$HOME/.config/tmux/"
+  rm -rf ".tmux"
+  echo ""
+fi
+
 # Dotfiles
 info "Copying dotfiles files"
 sleep 1
@@ -237,16 +248,6 @@ if [ -f "$HOME/.zshrc" ]; then
 fi
 mv -f "$HOME/.config/zsh/zshrc" "$HOME/.zshrc"
 
-# TEMP
-# Oh my tmux
-if [ ! -d ".tmux" ]; then
-  info "Oh my tmux not found. Installing."
-  git clone --single-branch https://github.com/gpakosz/.tmux.git ".tmux"
-  mkdir -p "$HOME/.config/tmux"
-  cp ".tmux/.tmux.conf" ".tmux/tmux.conf.local" "$HOME/.config/tmux/tmux.conf"
-  rm -rf ".tmux"
-fi
-
 # Nerd Fonts
 echo -e ""
 if [ ! -d "$HOME/nerd-fonts/" ]; then
@@ -263,6 +264,7 @@ if [ ! -d "$HOME/nerd-fonts/" ]; then
   fi
 fi
 sleep 1
+echo ""
 echo "-------------"
 echo -e "Done!"
 echo "-------------"
