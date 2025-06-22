@@ -2,7 +2,6 @@
 # Android SDK
 if [ -d "$HOME/Android/Sdk/" ]; then
   export ANDROID_HOME="$HOME/Android/Sdk"
-  export PATH="$PATH:$ANDROID_HOME/build-tools/35.0.1"
 fi
 
 EXPORT_PATH() {
@@ -15,11 +14,12 @@ EXPORT_PATH() {
 
 EXPORT_PATH "$HOME/.local/bin/"
 EXPORT_PATH "$HOME/.bin/"
-EXPORT_PATH "$XDG_DATA_DIRS:/var/lib/flatpak/exports/share/"
-EXPORT_PATH "$HOME/.local/share/flatpak/exports/share/applications/"
 EXPORT_PATH "$HOME/.spicetify/"
 EXPORT_PATH "$HOME/.scripts/"
 EXPORT_PATH "$HOME/.local/lib/"
+EXPORT_PATH "$HOME/.local/share/flatpak/exports/share/applications/"
+EXPORT_PATH "$ANDROID_HOME/build-tools/35.0.1"
+EXPORT_PATH "$XDG_DATA_DIRS:/var/lib/flatpak/exports/share/"
 
 CMD_CHECK() {
   command -v "$1" &>/dev/null
@@ -48,13 +48,6 @@ else
   echo "WARNING: neovim, vim and nano not found!"
 fi
 
-if "CMD_CHECK" "librewolf"; then
-  export BROWSER="/usr/bin/librewolf" 
-fi
-
-# Clang
-export CLANG_TYPE="aosp"
-
 # Oh My Zsh
 plugins=(
   git
@@ -70,10 +63,6 @@ POSH=agnoster
 eval "$(oh-my-posh init zsh --config $HOME/.config/ohmyposh/EDM115-newline.omp.json)"
 
 # Aliases
-# sdcard encrypt
-alias mount-sd="mountpoint-sdcrypt; $ROOT cryptsetup open /dev/sda3 sdcard-encrypted; $ROOT mount /dev/mapper/sdcard-encrypted /mnt/sdcard-encrypted"
-alias umount-sd="$ROOT umount /mnt/sdcard-encrypted; $ROOT cryptsetup close sdcard-encrypted; "
-
 if grep -q "gentoo" "/etc/os-release"; then
   alias ins="$ROOT emerge -navq"
   alias sup="$ROOT emerge --sync; $ROOT emerge -avq --changed-use --newuse --update --deep @world"
@@ -92,8 +81,6 @@ alias scp="$ROOT cp -r"
 alias catboys="cat"
 alias rm="$ROOT rm -rf"
 alias v="$EDITOR"
-alias d="$ROOT rm -rf"
-alias heat="rm"
 
 # Android Dev Stuff
 alias sync="repo sync -c -j$(nproc --all) --force-sync --no-clone-bundle --no-tags"
@@ -163,11 +150,10 @@ fi
 # ccache
 if "CMD_CHECK" "ccache"; then
   export USE_CCACHE="1"
-  export CCACHE_EXEC="/usr/bin/ccache"
   if [ ! -d "$HOME/.ccache" ]; then
     mkdir -p "$HOME/.ccache/"
-    export CCACHE_DIR="/home/ksawlii/.ccache"  
   fi
+  export CCACHE_DIR="$HOME/.ccache"
 else
   export USE_CCACHE="0"
 fi
@@ -178,3 +164,4 @@ setopt correct_all
 setopt hist_reduce_blanks
 setopt hist_ignore_space
 setopt hist_save_no_dups
+
