@@ -1,79 +1,80 @@
-# Exports
 # Android SDK
 if [ -d "$HOME/Android/Sdk/" ]; then
   export ANDROID_HOME="$HOME/Android/Sdk"
 fi
 
+# Exports
 EXPORT_PATH() {
-  local P="$1"
-
-  if [ -d "$P" ]; then
-    export PATH="$PATH:$P"
-  fi
+  for dir in "$@"; do
+    if [ -d "$dir" ]; then 
+      export PATH="$PATH:$dir"
+    fi
+  done
 }
 
-EXPORT_PATH "$HOME/.local/bin/"
-EXPORT_PATH "$HOME/.bin/"
-EXPORT_PATH "$HOME/.spicetify/"
-EXPORT_PATH "$HOME/.scripts/"
-EXPORT_PATH "$HOME/.local/lib/"
-EXPORT_PATH "$HOME/.local/share/flatpak/exports/share/applications/"
-EXPORT_PATH "$ANDROID_HOME/build-tools/35.0.1"
-EXPORT_PATH "$XDG_DATA_DIRS:/var/lib/flatpak/exports/share/"
+EXPORT_PATH \
+  "$HOME/.local/bin" \
+  "$HOME/.bin" \
+  "$HOME/.spicetify" \
+  "$HOME/.scripts" \
+  "$HOME/.local/lib" \
+  "$HOME/.local/share/flatpak/exports/share/applications" \
+  "$ANDROID_HOME/build-tools/35.0.1"
 
-CMD_CHECK() {
+export XDG_DATA_DIRS="${XDG_DATA_DIRS:-/usr/share}:/var/lib/flatpak/exports/share"
+
+cmd_check() {
   command -v "$1" &>/dev/null
 }
 
-if [ -f "/etc/doas.conf" ] && "CMD_CHECK" "doas"; then
+if [ -f "/etc/doas.conf" ] && cmd_check doas; then
   ROOT="doas"
-elif "CMD_CHECK" "sudo"; then
+elif cmd_check sudo; then
   ROOT="sudo"
 else
-  echo "WARNING: Doas and sudo not found!"
+  echo "WARNING: Neither doas nor sudo found!"
+fi
+
+if cmd_check nvim; then
+  export EDITOR="nvim"
+  export VISUAL="nvim"
+elif cmd_check vim; then
+  export EDITOR="vim"
+  export VISUAL="vim"
+elif cmd_check nano; then
+  export EDITOR="nano"
+  export VISUAL="nano"
+else
+  echo "WARNING: No editor (nvim, vim, nano) found!"
 fi
 
 export QT_QPA_PLATFORM="wayland"
 
-if "CMD_CHECK" "nvim"; then
-  export EDITOR="nvim"
-  export VISUAL="nvim" 
-elif "CMD_CHECK" "vim"; then
-  export EDITOR="vim"
-  export VISUAL="vim"
-elif "CMD_CHECK" "nano"; then
-  export EDITOR="nano"
-  export VISUAL="nano"
-else
-  echo "WARNING: neovim, vim and nano not found!"
-fi
-
 # Oh My Zsh
+export ZSH="$HOME/.oh-my-zsh"
 plugins=(
   git
   zsh-completions
-  zsh-history-substring-search 
+  zsh-history-substring-search
   zsh-syntax-highlighting
-  )
-export ZSH="$HOME/.oh-my-zsh"
-source $ZSH/oh-my-zsh.sh
+)
+source "$ZSH/oh-my-zsh.sh"
 
-# Oh My Posh 
-POSH=agnoster
-eval "$(oh-my-posh init zsh --config $HOME/.config/ohmyposh/EDM115-newline.omp.json)"
+# Oh My Posh
+eval "$(oh-my-posh init zsh --config "$HOME/.config/ohmyposh/EDM115-newline.omp.json")"
 
 # Aliases
-if grep -q "gentoo" "/etc/os-release"; then
+if grep -qi "gentoo" /etc/os-release; then
   alias ins="$ROOT emerge -navq"
-  alias sup="$ROOT emerge --sync; $ROOT emerge -avq --changed-use --newuse --update --deep @world"
+  alias sup="$ROOT emerge --sync && $ROOT emerge -avq --changed-use --newuse --update --deep @world"
   alias up="$ROOT emerge -avq --changed-use --newuse --update --deep @world"
-  alias mc="$ROOT $EDITOR /etc/portage/make.conf" 
-elif grep -q "arch" "/etc/os-release"; then
+  alias mc="$ROOT $EDITOR /etc/portage/make.conf"
+elif grep -qi "arch" /etc/os-release; then
   alias ins="$ROOT pacman -S --needed --noconfirm"
   alias up="$ROOT pacman -Syyuu --needed --noconfirm"
 fi
 
-# basic (doas, ls, etc.)
+# Basic aliases
 alias l="ls"
 alias la="ls -a"
 alias s="$ROOT"
@@ -82,11 +83,11 @@ alias catboys="cat"
 alias rm="$ROOT rm -rf"
 alias v="$EDITOR"
 
-# Android Dev Stuff
+# Android
 alias sync="repo sync -c -j$(nproc --all) --force-sync --no-clone-bundle --no-tags"
 alias b="make bacon -j$(nproc --all)"
 
-# git
+# Git
 alias gcl="git clone -j$(nproc --all)"
 alias gad="git add"
 alias gcm="git commit -s -m"
@@ -98,14 +99,14 @@ alias gpl="git pull -j$(nproc --all)"
 alias gru="git remote update"
 alias gcp="git cherry-pick -s"
 alias gccp="git cherry-pick --continue"
+alias gcs="git cherry-pick --skip"
 alias gst="git status"
 alias grm="git remote remove"
 alias gck="git checkout"
 alias grv="git revert -s"
 alias grc="git revert --continue"
-alias grs="git revert --skip"
+alias grs="git restore --staged"
 alias grb="git revert --abort"
-alias gcs="git cherry-pick --skip"
 alias grn="git revert --no-edit -S -s"
 alias gco="git commit -s"
 alias gca="git commit -s --amend"
@@ -113,52 +114,42 @@ alias gmr="git merge -S --signoff --log"
 alias gms="git merge --skip"
 alias gma="git merge --abort"
 alias gre="git restore"
-alias grs="git restore --staged"
 
-# zsh
+# Zsh shortcuts
 alias zshrc="$EDITOR $HOME/.zshrc"
 alias zsh="source $HOME/.zshrc"
 
-# Commands
+# commands
 command_not_found_handler() {
-	printf "%s%s?! Learn how to type dumbass fr\n" "$acc" "$0" >&2
+  printf "%s%s?! Learn how to type dumbass fr\n" "$acc" "$0" >&2
   return 127
 }
 
-mountpoint-sdcrypt () {
- if [ ! -d "/mnt/sdcard-encrypted" ]; then
-    "$ROOT" "mkdir -p /mnt/sdcard-encrypted"
-    echo "mountpoint for sdcard-encrypted created"
- fi
-}
-
+# Solvo
 solvo() {
-    for i in {1..100000}; do
-        echo "$i solvo explosions please"
-    done
+  for i in {1..100000}; do
+    echo "$i solvo explosions please"
+  done
 }
 
 solvo-vid() {
-    timg -V "$HOME/.config/zsh/vids/solvo.webm"
+  timg -V "$HOME/.config/zsh/vids/solvo.webm"
 }
 
+
 # Fastfetch
-if "CMD_CHECK" "fastfetch"; then
-  fastfetch  
-fi
+cmd_check "fastfetch" && fastfetch
 
-# ccache
-if "CMD_CHECK" "ccache"; then
-  export USE_CCACHE="1"
-  if [ ! -d "$HOME/.ccache" ]; then
-    mkdir -p "$HOME/.ccache/"
-  fi
+# ccache setup
+if cmd_check ccache; then
+  export USE_CCACHE=1
   export CCACHE_DIR="$HOME/.ccache"
+  [ -d "$CCACHE_DIR" ] || mkdir -p "$CCACHE_DIR"
 else
-  export USE_CCACHE="0"
+  export USE_CCACHE=0
 fi
 
-# History
+# history
 setopt auto_cd
 setopt correct_all
 setopt hist_reduce_blanks
