@@ -54,9 +54,9 @@
     // Harddisc space used
     "disk": {
         "interval": 30,
-        "format": "  {percentage_used}%   ",
+        "format": "   {percentage_used}%   ",
         "path": "/",
-        "on-click": "kitty -e htop"
+        "on-click": "kitty -e btop"
     }, 
 
     "hyprland/language": {
