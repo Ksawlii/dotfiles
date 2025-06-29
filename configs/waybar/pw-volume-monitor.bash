@@ -29,15 +29,15 @@ while snore $DELAY ; do
                 OUT+="  "
             fi
             if [[ -n "${BASH_REMATCH[3]}" ]] ; then
-                OUT+="${ICON[0]}Mute   "
+                OUT+="${ICON[0]}Mute  "
             else
                 volume=$(( 10#${BASH_REMATCH[1]}${BASH_REMATCH[2]} ))
                 if [[ $volume -gt 50 ]]; then
-                    OUT+="${ICON[3]}$volume%%    "
+                    OUT+="${ICON[3]} $volume%%   "
                 elif [[ $volume -gt 25 ]]; then
-                    OUT+="${ICON[2]}$volume%%    "
+                    OUT+="${ICON[2]} $volume%%   "
                 elif [[ $volume -gt 0 ]]; then
-                    OUT+="${ICON[1]}$volume%%    "
+                    OUT+="${ICON[1]} $volume%%   "
                 else
                     OUT+="${ICON[1]}---   "
                 fi
