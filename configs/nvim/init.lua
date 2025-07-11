@@ -101,6 +101,13 @@ end
 -- ╚═════╝ ╚═════╝ ╚═╝  ╚═══╝╚═╝     ╚═╝ ╚═════╝ ╚══════╝  --
 -------------------------------------------------------------
 
+-- Markview
+require("markview").setup({
+  experimental = {
+    check_rtp_message = false,
+  }
+})
+
 -- CMP
 local cmp = require("cmp")
 local luasnip = require("luasnip")
