@@ -72,7 +72,8 @@ require("lazy").setup({
     { "nvim-telescope/telescope.nvim", dependencies = { "nvim-lua/plenary.nvim" } },
     { "nvim-treesitter/nvim-treesitter", dependencies = { "nvim-treesitter/nvim-treesitter-textobjects" } },
     { "ya2s/nvim-cursorline" },
-    { "romgrk/barbar.nvim", dependencies = { "lewis6991/gitsigns.nvim", "nvim-tree/nvim-web-devicons", }, }
+    { "romgrk/barbar.nvim", dependencies = { "lewis6991/gitsigns.nvim", "nvim-tree/nvim-web-devicons", }, },
+    { "WhoIsSethDaniel/mason-tool-installer.nvim", dependencies = { "williamboman/mason.nvim" }, build = ":MasonToolsInstall" },
   },
   checker = { enabled = false },
 })
@@ -169,6 +170,20 @@ require("mason-lspconfig").setup({
   ensure_installed = { "pyright", "ts_ls", "gopls", "html", "bashls", "zls" },
   automatic_installation = true,
 })
+require('mason-tool-installer').setup {
+  ensure_installed = {
+    { "bash-language-server" },
+    { "cmake-language-server" },
+    { "cmakelang" },
+    { "cmakelint" },
+  },
+
+  auto_update = false,
+  integrations = {
+    [ "mason-null-ls" ] = false,
+    [ "mason-nvim-dap" ] = false,
+  },
+}
 
 -- LSP
 local lspconfig = require("lspconfig")
