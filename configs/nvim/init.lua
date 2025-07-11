@@ -31,7 +31,6 @@ require("lazy").setup({
     { "nvim-tree/nvim-web-devicons" },
     { "L3MON4D3/LuaSnip" },
     { "windwp/nvim-autopairs" },
-    { "nvim-treesitter/nvim-treesitter" },
     { "nvim-lua/plenary.nvim" },
     { "BurntSushi/ripgrep" },
     { "nvim-telescope/telescope.nvim" },
@@ -142,14 +141,6 @@ lspconfig.zls.setup{}
 
 -- Auto Pairs
 require("nvim-autopairs").setup{}
-
--- Treesitter
-require("nvim-treesitter.configs").setup {
- ensure_installed = { "lua", "python", "html", "css" },
- highlight = { enable = true },
- indent = { enable = true },
- textobjects = { enable = true },
-}
 
 -- Telescope
 require("telescope").setup{
@@ -328,6 +319,14 @@ map('n', '<Space>bn', '<Cmd>BufferOrderByName<CR>', opts)
 map('n', '<Space>bd', '<Cmd>BufferOrderByDirectory<CR>', opts)
 map('n', '<Space>bl', '<Cmd>BufferOrderByLanguage<CR>', opts)
 map('n', '<Space>bw', '<Cmd>BufferOrderByWindowNumber<CR>', opts)
+
+-- Treesitter
+require("nvim-treesitter.configs").setup {
+ ensure_installed = { "lua", "python", "html", "css" },
+ highlight = { enable = true },
+ indent = { enable = true },
+ textobjects = { enable = true },
+}
 
 -- vim.* settings
 vim.cmd.colorscheme "catppuccin"
