@@ -211,7 +211,9 @@ if [ ! -d "$HOME/.oh-my-zsh" ]; then
     info "Installing Oh My Zsh..."
     export RUNZSH=no
     export CHSH=no
-    sh -c "$(curl -fsSL https://raw.githubusercontent.com/ohmyzsh/ohmyzsh/master/tools/install.sh)"
+    export USER="$(whoami)"
+    sh -c "$(curl -fsSL https://raw.githubusercontent.com/ohmyzsh/ohmyzsh/master/tools/install.sh)" "" --unattended &> /dev/null
+    $ROOT chsh -s /bin/zsh "$USER"
 fi
 
 # Oh My Zsh Plugins
