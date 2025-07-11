@@ -167,7 +167,7 @@ require("luasnip.loaders.from_vscode").lazy_load()
 -- Mason
 require("mason").setup()
 require("mason-lspconfig").setup({
-  ensure_installed = { "pyright", "ts_ls", "gopls", "html", "bashls", "zls" },
+  ensure_installed = { "pyright", "ts_ls", "html", "bashls", "zls" },
   automatic_installation = true,
 })
 require('mason-tool-installer').setup {
