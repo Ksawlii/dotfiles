@@ -47,18 +47,12 @@ info()
 
 setup_arch()
 {
-    local DEPS=()
+    local DEPS=""
     local MISSING
 
-    DEPS+=(
-        "hyprland" "waybar" "rofi" "python-pipx" "dbus"
-        "kitty" "xdg-desktop-portal" "gtk2" "gtk3" "neovim"
-        "nwg-look" "fastfetch" "zsh" "grim" "satty"
-        "xdg-desktop-portal-gtk" "swaybg" "thunar" "xcur2png" "gsettings-qt"
-        "slurp" "wlogout" "wl-clipboard" "xdg-desktop-portal-wlr" "dunst"
-        "timg" "gtklock" "tmux" "playerctl" "cava"
-    )
-    MISSING="$(pacman -T "${DEPS[@]}" 2> /dev/null)"
+    DEPS="hyprland waybar rofi python-pipx dbus kitty xdg-desktop-portal gtk2 gtk3 \
+    neovim nwg-look fastfetch zsh grim satty xdg-desktop-portal-gtk swaybg thunar xcur2png \
+    gsettings-qt slurp wlogout wl-clipboard xdg-desktop-portal-wlr dunst timg gtklock tmux playerctl cava"
 
     if ! grep -q "^\[multilib\]" "/etc/pacman.conf"; then
         echo -e "\n[multilib]\nInclude = /etc/pacman.d/mirrorlist" | $ROOT tee -a "/etc/pacman.conf"
@@ -74,12 +68,8 @@ setup_arch()
         rm -rf "$HOME/.yay"
     fi
 
-    if [ -n "$MISSING" ]; then
-        echo -e ""
-        $ROOT yay -Syyuu --needed --noconfirm "$MISSING"
-    else
-        info "Nevermind, looks like you got every dependency already"
-    fi
+    echo -e ""
+    yay -Syyuu --needed --noconfirm "$DEPS"
 }
 
 setup_gentoo()
