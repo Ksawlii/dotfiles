@@ -81,7 +81,7 @@
     "custom/pipewire": {
         "tooltip": false,
         "restart-interval": 10,
-        "exec": "exec $HOME/.config/waybar/pw-volume-monitor.bash"
+        "exec": "exec $HOME/.config/waybar/scripts/pw-volume-monitor.bash"
    },
 
     // PlayerPause
