@@ -24,7 +24,7 @@ while snore $DELAY; do
     OUT=""
     INPUT="$(wpctl get-volume @DEFAULT_AUDIO_SINK@)"
     while read LINE; do
-        if [ "$LINE" =~ ^Volume:.([0-9]+)\.([0-9]{2})(([[:blank:]]\[MUTED\])?)$ ]; then
+        if [[ "$LINE" =~ ^Volume:.([0-9]+)\.([0-9]{2})(([[:blank:]]\[MUTED\])?)$ ]]; then
             if [ -n "$OUT" ]; then
                 OUT+="  "
             fi
