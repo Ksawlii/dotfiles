@@ -116,5 +116,13 @@
         "on-click": "playerctl previous",
         "tooltip": false,
 
+    },
+
+    "custom/spotify": {
+        "format": "  {}",
+        "max-length": 60,
+        "interval": 1,
+        "exec": "$HOME/.config/waybar/scripts/mediaplayer.sh 2> /dev/null",
+        "exec-if": "pgrep spotify"
     }
 }
