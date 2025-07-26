@@ -51,7 +51,7 @@ setup_arch()
     local MISSING
 
     DEPS="hyprland waybar rofi python-pipx dbus kitty xdg-desktop-portal gtk2 gtk3 \
-    neovim nwg-look fastfetch zsh grim satty xdg-desktop-portal-gtk swaybg thunar xcur2png \
+    neovim nwg-look fastfetch zsh grim satty xdg-desktop-portal-gtk swaybg thunar xcur2png hyfetch \
     gsettings-qt slurp wlogout wl-clipboard xdg-desktop-portal-wlr dunst timg gtklock tmux playerctl cava"
 
     if ! grep -q "^\[multilib\]" "/etc/pacman.conf"; then
@@ -88,7 +88,7 @@ setup_gentoo()
         "neovim" "xdg-desktop-portal" "swaybg" "xdg-desktop-portal-wlr" "thunar"
         "kitty" "dev-perl/Gtk2" "wl-clipboard" "sys-apps/dbus" "timg"
         "dunst" "gtklock" "dev-perl/Gtk3" "xcur2png" "nwg-look"
-        "fastfetch" "zsh" "grim" "slurp" "satty"
+        "fastfetch" "zsh" "grim" "slurp" "satty" "hyfetch"
         "wlroots" "xdg-desktop-portal-gtk" "tmux" "playerctl" "cava"
     )
     REPOS+=(
