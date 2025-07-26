@@ -13,7 +13,7 @@
 configuration {
   location:                    1;
   x-offset:                    20px;
-  y-offset:                    79px;
+  y-offset:                    78.5px;
 	modi:                       "drun,run,filebrowser,window";
     show-icons:                 true;
     display-drun:               " Apps";
@@ -63,7 +63,7 @@ window {
     fullscreen:                  false;
     width:                       800px;
     x-offset:                    20px;
-    y-offset:                    79px;
+    y-offset:                    78.5px;
 
     /* properties for all widgets */
     enabled:                     true;
