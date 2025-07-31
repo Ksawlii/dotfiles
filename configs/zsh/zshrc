@@ -106,7 +106,7 @@ alias rm="$ROOT rm -rf"
 alias v="$EDITOR"
 
 # Android
-alias sync="repo sync -c -j$(nproc --all) --force-sync --no-clone-bundle --no-tags"
+alias sync="repo sync -c -j$(nproc --all) --force-sync --no-clone-bundle --no-tags --jobs-network=8"
 alias b="make bacon -j$(nproc --all)"
 
 # Git
