@@ -257,6 +257,7 @@ require("lualine").setup({
 
 -- Catppuccin
 require("catppuccin").setup {
+  transparent_background = true,
   color_overrides = {
     all = {
       base = "#000000",
