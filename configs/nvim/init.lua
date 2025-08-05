@@ -65,7 +65,7 @@ require("lazy").setup({
     { "williamboman/mason.nvim" },
     { "williamboman/mason-lspconfig.nvim" },
     { "hrsh7th/cmp-emoji" },
-    { "Ksawlii/friendly-snippets" },
+    { "rafamadriz/friendly-snippets" },
     { "onsails/lspkind.nvim" },
     { "nvim-treesitter/nvim-treesitter", dependencies = { "nvim-treesitter/nvim-treesitter-textobjects" } },
     { "ya2s/nvim-cursorline" },
