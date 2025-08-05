@@ -163,6 +163,8 @@ warning()
 }
 # ]
 
+unset BROWSER
+
 if [[ "$EUID" -eq 0 ]]; then
     error "This script should not be run as root. Please run it as a regular user."
 fi
@@ -273,6 +275,27 @@ if [[ -f "$HOME/.zshrc" ]]; then
     mv -f "$HOME/.zshrc" "$HOME/.dotfiles-backup/zshrc"
 fi
 mv -f "$HOME/.config/zsh/zshrc" "$HOME/.zshrc"
+
+if [[ -d "$HOME/.librewolf" ]]; then
+    BROWSER=".librewolf"
+elif [[ -d "$HOME/.firefox" ]]; then
+    BROWSER=".firefox"
+fi
+
+if [[ -n $BROWSER ]]; then
+    DIR="$(find "$HOME/$BROWSER" -type d -name "*default-release*" -print -quit)"
+    if [[ ! -d "$DIR/chrome" ]]; then
+        if ! grep -q 'toolkit\.legacyUserProfileCustomizations\.stylesheets.*true' "$DIR/prefs.js"; then
+            if ! grep -q 'toolkit\.legacyUserProfileCustomizations\.stylesheets.*' "$DIR/prefs.js"; then
+                sed -i '/user_pref("toolkit\.legacyUserProfileCustomizations\.stylesheets",/d' "$DIR/prefs.js"
+            fi
+        fi
+
+        echo 'user_pref("toolkit.legacyUserProfileCustomizations.stylesheets", true);' >> "$DIR/prefs.js"
+
+        git clone -q "https://github.com/alfaaarex/keyfox.git" "$DIR/chrome"
+    fi
+fi
 
 # Nerd Fonts
 echo -e ""
