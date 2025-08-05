@@ -1,4 +1,4 @@
-[ ! -d "$HOME/Pictures/screenshots" ] && mkdir -p "$HOME/Pictures/screenshots"
+[[ ! -d "$HOME/Pictures/screenshots" ]] && mkdir -p "$HOME/Pictures/screenshots"
 
 TMP_PNG=$(mktemp --suffix=.png) \
     && grim -g "$(slurp)" -t png "$TMP_PNG" \
