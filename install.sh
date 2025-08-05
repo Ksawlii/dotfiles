@@ -105,7 +105,7 @@ setup_gentoo()
     fi
 
     for r in "${REPOS[@]}"; do
-        if ! grep -q "^\[$r\]" "/etc/portage/repos.conf/eselect-repo.conf"; then
+        if ! grep -q "^\[[$r\]]" "/etc/portage/repos.conf/eselect-repo.conf"; then
             $ROOT eselect repository enable "$r"
         fi
     done
@@ -116,20 +116,20 @@ setup_gentoo()
             for u in "${TO_UNMASK[@]}"; do
                 CTG="${u%%/*}"
                 PKG="${u##*/}"
-                if [ "$PKG" == "$d" ]; then
+                if [[ "$PKG" == "$d" ]]; then
                     unmask "$CTG" "$PKG"
                 fi
             done
         fi
     done
 
-    if [ "${#MISSING[@]}" -gt 0 ]; then
-        $ROOT emerge -avq "${MISSING[@]}"
+    if [[ "${#MISSING[[@]]}" -gt 0 ]]; then
+        $ROOT emerge -avq "${MISSING[[@]]}"
     else
         info "Nevermind, looks like you got every dependency already"
     fi
 
-    if [ -f "/usr/share/wayland-sessions/hyprland.desktop" ]; then
+    if [[ -f "/usr/share/wayland-sessions/hyprland.desktop" ]]; then
         if ! grep -q "Exec=dbus-run-session Hyprland" "/usr/share/wayland-sessions/hyprland.desktop"; then
             echo -e ""
             info "Patching hyprland.desktop to run with dbus"
@@ -145,9 +145,9 @@ unmask()
     local I="${1}/${2} ~amd64"
     local PCK_KEYWORDS="/etc/portage/package.accept_keywords"
 
-    [ ! -d "$PCK_KEYWORDS" ] && $ROOT mkdir -p "$PCK_KEYWORDS"
+    [[ ! -d "$PCK_KEYWORDS" ]] && $ROOT mkdir -p "$PCK_KEYWORDS"
     if ! grep -Fxq "$I" "$PCK_KEYWORDS/$1" 2> /dev/null; then
-        if [ ! -f "$PCK_KEYWORDS/$1" ]; then
+        if [[ ! -f "$PCK_KEYWORDS/$1" ]]; then
             $ROOT touch "$PCK_KEYWORDS/$1"
         fi
         echo "$I" | $ROOT tee -a "$PCK_KEYWORDS/$1" > /dev/null
@@ -163,11 +163,11 @@ warning()
 }
 # ]
 
-if [ "$EUID" -eq 0 ]; then
+if [[ "$EUID" -eq 0 ]]; then
     error "This script should not be run as root. Please run it as a regular user."
 fi
 
-if [ -f "/etc/doas.conf" ] && check_exec "doas"; then
+if [[ -f "/etc/doas.conf" ]] && check_exec "doas"; then
     ROOT="doas"
 elif check_exec "sudo"; then
     ROOT="sudo"
@@ -207,7 +207,7 @@ if ! $SKIPPED; then
     unset SKIPPED
 fi
 
-if [ ! -d "$HOME/.oh-my-zsh" ]; then
+if [[ ! -d "$HOME/.oh-my-zsh" ]]; then
     info "Installing Oh My Zsh..."
     export RUNZSH=no
     export CHSH=no
@@ -223,7 +223,7 @@ PLUGINS=(
     "zsh-history-substring-search"
 )
 for p in "${PLUGINS[@]}"; do
-    if [ ! -d "$HOME/.oh-my-zsh/custom/plugins/$p" ]; then
+    if [[ ! -d "$HOME/.oh-my-zsh/custom/plugins/$p" ]]; then
         info "$p plugin not found. Installing..."
         git clone -q "https://github.com/zsh-users/$p" "$HOME/.oh-my-zsh/custom/plugins/$p"
     fi
@@ -232,7 +232,7 @@ done
 # Oh My Posh
 if ! check_exec "oh-my-posh"; then
     info "Oh My Posh Not Found. Installing..."
-    [ ! -d "$HOME/.local/bin" ] && mkdir -p "$HOME/.local/bin"
+    [[ ! -d "$HOME/.local/bin" ]] && mkdir -p "$HOME/.local/bin"
     curl -s https://ohmyposh.dev/install.sh | bash -s -- -d "$HOME/.local/bin/" &> /dev/null
     NOT_FOUND=true
 fi
@@ -242,10 +242,10 @@ if ! $NOT_FOUND; then
     unset NOT_FOUND
 fi
 
-[ ! -d "$HOME/.config" ] && mkdir -p "$HOME/.config"
+[[ ! -d "$HOME/.config" ]] && mkdir -p "$HOME/.config"
 
 # Oh my tmux
-if [ ! -d "$HOME/.config/tmux" ]; then
+if [[ ! -d "$HOME/.config/tmux" ]]; then
     info "Oh my tmux not found. Installing..."
     git clone --single-branch -q https://github.com/gpakosz/.tmux.git ".tmux"
     mkdir -p "$HOME/.config/tmux"
@@ -260,7 +260,7 @@ sleep 1
 
 FILES=("configs/"*)
 for f in "${FILES[@]}"; do
-    if [ -d "$HOME/.config/$f" ]; then
+    if [[ -d "$HOME/.config/$f" ]]; then
         mkdir -p "$HOME/.dotfiles-backup"
         mv -f "$HOME/.config/$f" "$HOME/.dotfiles-backup"
     fi
@@ -268,15 +268,15 @@ for f in "${FILES[@]}"; do
     cp -rfa "$f" "$HOME/.config"
 done
 
-if [ -f "$HOME/.zshrc" ]; then
-    [ ! -d "$HOME/.dotfiles-backup" ] && mkdir -p "$HOME/.dotfiles-backup"
+if [[ -f "$HOME/.zshrc" ]]; then
+    [[ ! -d "$HOME/.dotfiles-backup" ]] && mkdir -p "$HOME/.dotfiles-backup"
     mv -f "$HOME/.zshrc" "$HOME/.dotfiles-backup/zshrc"
 fi
 mv -f "$HOME/.config/zsh/zshrc" "$HOME/.zshrc"
 
 # Nerd Fonts
 echo -e ""
-if [ ! -d "$HOME/nerd-fonts" ]; then
+if [[ ! -d "$HOME/nerd-fonts" ]]; then
     if ask_user "Do you want Nerd Fonts (Recommended) (8GB)?"; then
         git clone -j$(nproc --all) --depth=1 "https://github.com/ryanoasis/nerd-fonts.git" "$HOME/nerd-fonts"
         cd "$HOME/nerd-fonts"
