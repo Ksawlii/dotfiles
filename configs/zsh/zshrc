@@ -14,7 +14,7 @@ command_not_found_handler()
 export_path()
 {
     for dir in "$@"; do
-        [ -d "$dir" ] && export PATH="$PATH:$dir"
+        [[ -d "$dir" ]] && export PATH="$PATH:$dir"
     done
 }
 
@@ -32,7 +32,7 @@ solvo-vid()
 # ]
 
 # Android SDK
-if [ -d "$HOME/Android/Sdk" ]; then
+if [[ -d "$HOME/Android/Sdk" ]]; then
     export ANDROID_HOME="$HOME/Android/Sdk"
 fi
 
@@ -48,7 +48,7 @@ export_path \
 
 export XDG_DATA_DIRS="${XDG_DATA_DIRS:-/usr/share}:/var/lib/flatpak/exports/share"
 
-if [ -f "/etc/doas.conf" ] && check_exec "doas"; then
+if [[ -f "/etc/doas.conf" ]] && check_exec "doas"; then
     ROOT="doas"
 elif check_exec "sudo"; then
     ROOT="sudo"
@@ -148,7 +148,7 @@ check_exec "fastfetch" && fastfetch
 if check_exec "ccache"; then
     export USE_CCACHE=1
     export CCACHE_DIR="$HOME/.ccache"
-    [ -d "$CCACHE_DIR" ] || mkdir -p "$CCACHE_DIR"
+    [[ -d "$CCACHE_DIR" ]] || mkdir -p "$CCACHE_DIR"
 else
     export USE_CCACHE=0
 fi
