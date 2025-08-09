@@ -260,11 +260,19 @@ fi
 info "Copying dotfiles files"
 sleep 1
 
+DATE="$(date +%Y%m%d)"
+BACKUP_DIR="$HOME/.dotfiles-backup/$DATE"
 FILES=("configs/"*)
+I="0"
 for f in "${FILES[@]}"; do
-    if [[ -d "$HOME/.config/$f" ]]; then
-        mkdir -p "$HOME/.dotfiles-backup"
-        mv -f "$HOME/.config/$f" "$HOME/.dotfiles-backup"
+    while [[ -d "$BACKUP_DIR" ]]; do
+        I=$((I + 1))
+        BACKUP_DIR="$BACKUP_DIR-$I"
+        [[ -d "$BACKUP_DIR" ]] && rm -rf "$BACKUP_DIR"
+        mkdir -p "$BACKUP_DIR"
+    done
+    if [[ -e "$HOME/.config/$f" ]]; then
+        mv -f "$HOME/.config/$f" "$BACKUP_DIR"
     fi
     echo "- Copying $f"
     cp -rfa "$f" "$HOME/.config"
