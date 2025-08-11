@@ -21,23 +21,41 @@ if [[ "$PARENT_NAME" != "install.sh" ]]; then
     exit 1
 fi
 
-source "$SRC_DIR/scripts/sys/log_utils.sh"
+source "$SRC_DIR/scripts/utils/log_utils.sh"
 
 # [
-setup_arch()
+SETUP_ARCH()
 {
     local DEPS=""
-    local MISSING
 
     DEPS="hyprland waybar rofi python-pipx dbus kitty xdg-desktop-portal gtk2 gtk3 \
     neovim nwg-look fastfetch zsh grim satty xdg-desktop-portal-gtk swaybg thunar xcur2png hyfetch \
     gsettings-qt slurp wlogout wl-clipboard xdg-desktop-portal-wlr dunst timg gtklock tmux playerctl cava"
+    local DEPS_HASH=$(
+        for i in $DEPS; do
+            echo "$i" >> temp
+        done
+        sha1sum temp | awk '{print $1}'
+        rm -f temp
+    )
+
+    if [[ -f "$HOME/.config/.deps-installed" ]]; then
+        if [[ "$(sha1sum $HOME/.config/.deps-installed | awk '{print $1}')" != "$DEPS_HASH" ]]; then
+            rm -rf "$HOME/.config/.deps-installed"
+            for i in $DEPS; do
+                echo "$i" >> "$HOME/.config/.deps-installed"
+            done
+        else
+            LOG "- Nothing to do."
+            exit 0
+        fi
+    fi
 
     if ! grep -q "^\[multilib\]" "/etc/pacman.conf"; then
         echo -e "\n[multilib]\nInclude = /etc/pacman.d/mirrorlist" | $ROOT tee -a "/etc/pacman.conf"
     fi
 
-    if ! check_exec "yay"; then
+    if ! CHECK_EXEC "yay"; then
         echo -e ""
         LOG_STEP_IN "- Yay not installed. Installing yay (AUR helper)..."
         $ROOT pacman -S --needed base-devel git
@@ -55,18 +73,14 @@ setup_arch()
     yay -S --needed --noconfirm "$DEPS"
 }
 
-setup_gentoo()
+SETUP_GENTOO()
 {
-    local TO_UNMASK=()
-    local DEPS=()
-    local REPOS=()
     local MISSING=()
-
-    TO_UNMASK+=(
+    local TO_UNMASK=(
         "media-gfx/timg" "gui-apps/wlogout" "x11-apps/xcur2png"
         "app-misc/nwg-look" "gui-apps/satty" "gui-apps/gtklock" "gui-libs/gtk-session-lock"
     )
-    DEPS+=(
+    local DEPS=(
         "hyprland" "wlogout" "waybar" "rofi"
         "neovim" "xdg-desktop-portal" "swaybg" "xdg-desktop-portal-wlr" "thunar"
         "kitty" "dev-perl/Gtk2" "wl-clipboard" "sys-apps/dbus" "timg"
@@ -74,13 +88,32 @@ setup_gentoo()
         "fastfetch" "zsh" "grim" "slurp" "satty" "hyfetch"
         "wlroots" "xdg-desktop-portal-gtk" "tmux" "playerctl" "cava"
     )
-    REPOS+=(
+    local REPOS=(
         "kzd" "guru" "steam-overlay"
     )
+    local DEPS_HASH=$(
+        for i in "${DEPS[@]}"; do
+            echo "$i" >> temp
+        done
+        sha1sum temp | awk '{print $1}'
+        rm -f temp
+    )
+
+    if [[ -f "$HOME/.config/.deps-installed" ]]; then
+        if [[ "$(sha1sum $HOME/.config/.deps-installed | awk '{print $1}')" != "$DEPS_HASH" ]]; then
+            rm -rf "$HOME/.config/.deps-installed"
+            for i in "${DEPS[@]}"; do
+                echo "$i" >> "$HOME/.config/.deps-installed"
+            done
+        else
+            LOG "- Nothing to do."
+            exit 0
+        fi
+    fi
 
     $ROOT emerge -q --sync
 
-    if ! check_exec "equery"; then
+    if ! CHECK_EXEC "equery"; then
         LOG "- equery not found. Installing."
         $ROOT emerge -avq app-portage/gentoolkit
     fi
@@ -102,7 +135,7 @@ setup_gentoo()
                 CTG="${u%%/*}"
                 PKG="${u##*/}"
                 if [[ "$PKG" == "$d" ]]; then
-                    unmask "$CTG" "$PKG"
+                    UNMASK "$CTG" "$PKG"
                 fi
             done
         fi
@@ -125,7 +158,7 @@ setup_gentoo()
     fi
 }
 
-unmask()
+UNMASK()
 {
     local I="${1}/${2} ~amd64"
     local PCK_KEYWORDS="/etc/portage/package.accept_keywords"
@@ -141,9 +174,11 @@ unmask()
 # ]
 
 if [[ "$1" = "Gentoo" ]]; then
-    setup_gentoo
+    SETUP_GENTOO
 elif [[ "$1" = "Arch Linux" ]]; then
-    setup_arch
+    SETUP_ARCH
 else
     LOGE "Your Distro is not supported ($1)"
 fi
+
+exit 0

@@ -21,29 +21,36 @@ if [[ "$PARENT_NAME" != "install.sh" ]]; then
     exit 1
 fi
 
-source "$SRC_DIR/scripts/sys/commands.sh"
+source "$SRC_DIR/scripts/utils/common_utils.sh" || exit 1
+source "$SRC_DIR/scripts/utils/log_utils.sh" || exit 1
 
-nerd(){
-    if ask_user "Do you want Nerd Fonts (Recommended) (8GB)?"; then
-        git clone -j$(nproc --all) --depth=1 "https://github.com/ryanoasis/nerd-fonts.git" "$HOME/nerd-fonts"
-        cd "$HOME/nerd-fonts"
-        ./install.sh
-
-        FONTS=(
+GET_NERD(){
+    local EXTRA_FONTS=(
             'MesloLGS%20NF%20Regular.ttf'
             'MesloLGS%20NF%20Bold.ttf'
             'MesloLGS%20NF%20Italic.ttf'
             'MesloLGS%20NF%20Bold%20Italic.ttf'
-        )
-        for f in "${FONTS[@]}"; do
-            wget -q "https://github.com/romkatv/powerlevel10k-media/raw/master/$f"
-        done
-        mv "MesloLGS NF "* "$HOME/.local/share/fonts/NerdFonts"
-        cd "$SRC_DIR"
-        rm -rf "$HOME/nerd-fonts"
-    fi
+          )
+
+    LOG "- Cloning nerd fonts."
+    git clone -j$(nproc --all) --depth=1 -q "https://github.com/ryanoasis/nerd-fonts.git" "$HOME/nerd-fonts"
+    cd "$HOME/nerd-fonts"
+    LOG "- Installing nerd fonts."
+    bash install.sh &>/dev/null
+
+    for f in "${EXTRA_FONTS[@]}"; do
+        wget -q "https://github.com/romkatv/powerlevel10k-media/raw/master/$f"
+    done
+    mv "MesloLGS NF "* "$HOME/.local/share/fonts/NerdFonts"
+    cd "$SRC_DIR"
+    rm -rf "$HOME/nerd-fonts"
+    LOG "- Installed nerd fonts"
 }
 
-if [[ ! -d "$HOME/nerd-fonts" ]]; then
-    nerd
+if [[ ! -d "$HOME/.local/share/fonts/NerdFonts" ]]; then
+   GET_NERD
+else
+   LOG "- NerdFonts are already installed."
 fi
+
+exit 0

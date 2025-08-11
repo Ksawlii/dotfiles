@@ -24,7 +24,8 @@ if [[ ! -f "env.sh" ]]; then
 fi
 
 source "env.sh"
-source "$SRC_DIR/scripts/sys/commands.sh" || exit 1
+source "$SRC_DIR/scripts/utils/common_utils.sh" || exit 1
+source "$SRC_DIR/scripts/utils/log_utils.sh" || exit 1
 
 unset BROWSER
 export PARENT_NAME=$(basename "$0")
@@ -33,21 +34,18 @@ if [[ "$EUID" -eq 0 ]]; then
     LOGE "This script should not be run as root. Please run it as a regular user."
 fi
 
-if [[ -f "/etc/doas.conf" ]] && check_exec "doas"; then
-    ROOT="doas"
-elif check_exec "sudo"; then
-    ROOT="sudo"
+if [[ -f "/etc/doas.conf" ]] && CHECK_EXEC "doas"; then
+    export ROOT="doas"
+elif CHECK_EXEC "sudo"; then
+    export ROOT="sudo"
 else
     LOGE "Doas and sudo not found. Install doas or sudo!"
 fi
 
-echo ""
-if ask_user "Do you want to install dependencies (very recommended)?"; then
-    DISTRO="$(grep -q '^NAME=' "/etc/os-release" | cut -d= -f2 | tr -d '"')"
-    bash "$SRC_DIR/scripts/deps.sh" "$DISTRO" || exit 1
-else
-    LOGW "Skipping dependencies installation"
-fi
+LOG_STEP_IN true "Installing dependencies"
+DISTRO="$(grep '^NAME=' "/etc/os-release" | cut -d= -f2 | tr -d '"')"
+bash "$SRC_DIR/scripts/deps.sh" "$DISTRO" || exit 1
+LOG_STEP_OUT
 
 # Dotfiles
 LOG_STEP_IN true "Setting up dotfiles"
@@ -59,9 +57,6 @@ LOG_STEP_IN true "Setting up fonts"
 bash "$SRC_DIR/scripts/fonts.sh" || exit 1
 LOG_STEP_OUT
 
-echo ""
-echo "-------------"
-echo -e "Done!"
-echo "-------------"
+echo -e '\n\033[1;32m'"Dotfiles are installed. Please reboot!"
 
 exit 0

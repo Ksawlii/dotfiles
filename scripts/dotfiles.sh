@@ -21,9 +21,11 @@ if [[ "$PARENT_NAME" != "install.sh" ]]; then
     exit 1
 fi
 
-source "$SRC_DIR/scripts/sys/commands.sh" || exit 1
+source "$SRC_DIR/scripts/utils/common_utils.sh" || exit 1
+source "$SRC_DIR/scripts/utils/log_utils.sh" || exit 1
 
-omz()
+# [
+GET_OMZ()
 {
     LOG_STEP_IN "- Installing Oh My Zsh..."
     export RUNZSH=no
@@ -35,7 +37,7 @@ omz()
     LOG_STEP_OUT
 }
 
-omz_plugins(){
+GET_OMZ_PLUGINS(){
     local PLUGINS=(
           "zsh-completions"
           "zsh-syntax-highlighting"
@@ -49,14 +51,14 @@ omz_plugins(){
     done
 }
 
-omp()
+GET_OMP()
 {
     LOG "- Oh My Posh Not Found. Installing."
     [[ ! -d "$HOME/.local/bin" ]] && mkdir -p "$HOME/.local/bin"
     curl -s https://ohmyposh.dev/install.sh | bash -s -- -d "$HOME/.local/bin/" &> /dev/null
 }
 
-omt()
+GET_OMT()
 {
     LOG "- Oh my tmux not found. Installing."
     git clone --single-branch -q https://github.com/gpakosz/.tmux.git ".tmux"
@@ -65,7 +67,7 @@ omt()
     rm -rf ".tmux"
 }
 
-dotfiles()
+GET_DOTFILES()
 {
     local DATE="$(date +%Y%m%d)"
     local BACKUP_DIR="$HOME/.dotfiles-backup/$DATE"
@@ -77,16 +79,10 @@ dotfiles()
             I=$((I + 1))
             BACKUP_DIR="$BACKUP_DIR-$I"
             [[ -d "$BACKUP_DIR" ]] && rm -rf "$BACKUP_DIR"
-            mkdir -p "$BACKUP_DIR"
         done
+        mkdir -p "$BACKUP_DIR"
     else
         mkdir -p "$BACKUP_DIR"
-    fi
-
-    if [[ -d "$HOME/.librewolf" ]]; then
-        local BROWSER=".librewolf"
-    elif [[ -d "$HOME/.firefox" ]]; then
-        local BROWSER=".firefox"
     fi
 
     LOG_STEP_IN "- Copying dotfiles files."
@@ -102,37 +98,55 @@ dotfiles()
 
     mv -f "$HOME/.config/zsh/zshrc" "$HOME/.zshrc"
     LOG_STEP_OUT
+}
 
-    if [[ -n $BROWSER ]]; then
-        LOG "- Adding custom css for $BROWSER"
-        local DIR="$(find "$HOME/$BROWSER" -type d -name "*default-release*" -print -quit)"
-        if [[ ! -d "$DIR/chrome" ]]; then
-            if ! grep -q 'toolkit\.legacyUserProfileCustomizations\.stylesheets.*true' "$DIR/prefs.js"; then
-                if ! grep -q 'toolkit\.legacyUserProfileCustomizations\.stylesheets.*' "$DIR/prefs.js"; then
-                    sed -i '/user_pref("toolkit\.legacyUserProfileCustomizations\.stylesheets",/d' "$DIR/prefs.js"
-                fi
+GET_BROWSER_CSS()
+{
+    local BROWSER="$1"
+
+    if [[ -z "$BROWSER" ]]; then
+        exit 0
+    fi
+
+    LOG "- Adding custom css for $BROWSER"
+    local DIR="$(find "$HOME/.$BROWSER" -type d -name "*default-release*" -print -quit)"
+    if [[ ! -d "$DIR/chrome" ]]; then
+        if ! grep -q 'toolkit\.legacyUserProfileCustomizations\.stylesheets.*true' "$DIR/prefs.js"; then
+            if ! grep -q 'toolkit\.legacyUserProfileCustomizations\.stylesheets.*' "$DIR/prefs.js"; then
+                sed -i '/user_pref("toolkit\.legacyUserProfileCustomizations\.stylesheets",/d' "$DIR/prefs.js"
             fi
-            echo 'user_pref("toolkit.legacyUserProfileCustomizations.stylesheets", true);' >> "$DIR/prefs.js"
-            git clone -q "https://github.com/alfaaarex/keyfox.git" "$DIR/chrome"
         fi
+        echo 'user_pref("toolkit.legacyUserProfileCustomizations.stylesheets", true);' >> "$DIR/prefs.js"
+        git clone -q "https://github.com/alfaaarex/keyfox.git" "$DIR/chrome"
     fi
 }
+# ]
 
 # Oh My Zsh
 if [[ ! -d "$HOME/.oh-my-zsh" ]]; then
-    omz
+    GET_OMZ
 fi
-omz_plugins
+GET_OMZ_PLUGINS
 
 # Oh My Posh
-if ! check_exec "oh-my-posh"; then
-    omp
+if ! CHECK_EXEC "oh-my-posh"; then
+    GET_OMP
 fi
 
 # Oh My Tmux
 if [[ ! -d "$HOME/.config/tmux" ]]; then
-    omt
+    GET_OMT
 fi
 
+# Custom css for firefox/librewolf
+if [[ -d "$HOME/.librewolf" ]]; then
+    BROWSER="librewolf"
+elif [[ -d "$HOME/.firefox" ]]; then
+    BROWSER="firefox"
+fi
+GET_BROWSER_CSS "$BROWSER"
+
 # Dotfiles
-dotfiles
+GET_DOTFILES
+
+exit 0

@@ -16,33 +16,8 @@
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #
 
-source "$SRC_DIR/scripts/sys/log_utils.sh"
-
 # [
-# https://github.com/saadelasfur/distro-setup-utils/blob/98f8764c83b8254e2a6ec3da1d5cd66a7d1f024b/scripts/utils/common_utils.sh#L36-L58
-ask_user()
-{
-    local ANSWER
-    local PROMPT="$1 [y/n] "
-
-    while true; do
-        _SET_INDENT
-        read -rp "$PROMPT" ANSWER
-        case "${ANSWER,,}" in
-            y|yes)
-                return 0
-                ;;
-            n|no)
-                return 1
-                ;;
-            *)
-                LOGW "! Please answer yes or no"
-                ;;
-        esac
-    done
-}
-
-check_exec()
+CHECK_EXEC()
 {
     command -v "$1" &> /dev/null
     return $?
