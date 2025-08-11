@@ -30,7 +30,7 @@ unset BROWSER
 export PARENT_NAME=$(basename "$0")
 
 if [[ "$EUID" -eq 0 ]]; then
-    error "This script should not be run as root. Please run it as a regular user."
+    LOGE "This script should not be run as root. Please run it as a regular user."
 fi
 
 if [[ -f "/etc/doas.conf" ]] && check_exec "doas"; then
@@ -38,7 +38,7 @@ if [[ -f "/etc/doas.conf" ]] && check_exec "doas"; then
 elif check_exec "sudo"; then
     ROOT="sudo"
 else
-    error "Doas and sudo not found. Install doas or sudo!"
+    LOGE "Doas and sudo not found. Install doas or sudo!"
 fi
 
 echo ""
@@ -46,14 +46,18 @@ if ask_user "Do you want to install dependencies (very recommended)?"; then
     DISTRO="$(grep -q '^NAME=' "/etc/os-release" | cut -d= -f2 | tr -d '"')"
     bash "$SRC_DIR/scripts/deps.sh" "$DISTRO" || exit 1
 else
-    warning "Skipping dependencies installation"
+    LOGW "Skipping dependencies installation"
 fi
 
 # Dotfiles
+LOG_STEP_IN true "Setting up dotfiles"
 bash "$SRC_DIR/scripts/dotfiles.sh" || exit 1
+LOG_STEP_OUT
 
 # Fonts
+LOG_STEP_IN true "Setting up fonts"
 bash "$SRC_DIR/scripts/fonts.sh" || exit 1
+LOG_STEP_OUT
 
 echo ""
 echo "-------------"

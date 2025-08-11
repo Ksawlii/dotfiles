@@ -21,7 +21,7 @@ if [[ "$PARENT_NAME" != "install.sh" ]]; then
     exit 1
 fi
 
-source "$SRC_DIR/scripts/sys/logs.sh"
+source "$SRC_DIR/scripts/sys/log_utils.sh"
 
 # [
 setup_arch()
@@ -39,16 +39,20 @@ setup_arch()
 
     if ! check_exec "yay"; then
         echo -e ""
-        info "Yay not installed. Installing yay (AUR helper)..."
+        LOG_STEP_IN "- Yay not installed. Installing yay (AUR helper)..."
         $ROOT pacman -S --needed base-devel git
-        git clone "https://aur.archlinux.org/yay.git" "$HOME/.yay"
+        git clone -q "https://aur.archlinux.org/yay.git" "$HOME/.yay"
         cd "$HOME/.yay"
-        makepkg -si
+        makepkg -si >/dev/null
         rm -rf "$HOME/.yay"
+        LOG_STEP_OUT
     fi
 
-    echo -e ""
-    yay -Syyuu --needed --noconfirm "$DEPS"
+    LOG "- Running a full system update with yay"
+    yay -Syyuu --needed --noconfirm
+
+    LOG "- Installing dependencies"
+    yay -S --needed --noconfirm "$DEPS"
 }
 
 setup_gentoo()
@@ -77,9 +81,11 @@ setup_gentoo()
     $ROOT emerge -q --sync
 
     if ! check_exec "equery"; then
+        LOG "- equery not found. Installing."
         $ROOT emerge -avq app-portage/gentoolkit
     fi
     if ! eselect "repository" &> /dev/null; then
+        LOG "- eselect-repository not found. Installing. "
         $ROOT emerge -navq eselect-repository
     fi
 
@@ -103,19 +109,19 @@ setup_gentoo()
     done
 
     if [[ "${#MISSING[[@]]}" -gt 0 ]]; then
+        LOG "- Installing dependencies."
         $ROOT emerge -avq "${MISSING[[@]]}"
     else
-        info "Nevermind, looks like you got every dependency already"
+        LOG "- Nevermind, looks like you got every dependency already"
     fi
 
     if [[ -f "/usr/share/wayland-sessions/hyprland.desktop" ]]; then
         if ! grep -q "Exec=dbus-run-session Hyprland" "/usr/share/wayland-sessions/hyprland.desktop"; then
-            echo -e ""
-            info "Patching hyprland.desktop to run with dbus"
+            LOG "- Patching hyprland.desktop to run with dbus"
             $ROOT sed -i "s.Exec\=Hyprland.Exec=dbus-run-session\ Hyprland.g" "/usr/share/wayland-sessions/hyprland.desktop"
         fi
     else
-        warn "/usr/share/wayland-sessions/hyprland.desktop not found."
+        LOGW "- /usr/share/wayland-sessions/hyprland.desktop not found. Skipping dbus patch."
     fi
 }
 
@@ -139,5 +145,5 @@ if [[ "$1" = "Gentoo" ]]; then
 elif [[ "$1" = "Arch Linux" ]]; then
     setup_arch
 else
-    error "Your Distro is not supported ($1)"
+    LOGE "Your Distro is not supported ($1)"
 fi

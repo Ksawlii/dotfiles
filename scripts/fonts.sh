@@ -22,7 +22,6 @@ if [[ "$PARENT_NAME" != "install.sh" ]]; then
 fi
 
 source "$SRC_DIR/scripts/sys/commands.sh"
-source "$SRC_DIR/scripts/sys/logs.sh"
 
 nerd(){
     if ask_user "Do you want Nerd Fonts (Recommended) (8GB)?"; then

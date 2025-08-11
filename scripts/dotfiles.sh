@@ -22,17 +22,17 @@ if [[ "$PARENT_NAME" != "install.sh" ]]; then
 fi
 
 source "$SRC_DIR/scripts/sys/commands.sh" || exit 1
-source "$SRC_DIR/scripts/sys/logs.sh" || exit 1
 
 omz()
 {
-    info "Installing Oh My Zsh..."
+    LOG_STEP_IN "- Installing Oh My Zsh..."
     export RUNZSH=no
     export CHSH=no
     export USER="$(whoami)"
     sh -c "$(curl -fsSL https://raw.githubusercontent.com/ohmyzsh/ohmyzsh/master/tools/install.sh)" "" --unattended &> /dev/null
     $ROOT chsh -s /bin/zsh "$USER"
     unset RUNZSH CHSH
+    LOG_STEP_OUT
 }
 
 omz_plugins(){
@@ -43,7 +43,7 @@ omz_plugins(){
           )
     for p in "${PLUGINS[@]}"; do
         if [[ ! -d "$HOME/.oh-my-zsh/custom/plugins/$p" ]]; then
-            info "$p plugin not found. Installing..."
+            LOG "- $p plugin not found. Installing..."
             git clone -q "https://github.com/zsh-users/$p" "$HOME/.oh-my-zsh/custom/plugins/$p"
         fi
     done
@@ -51,14 +51,14 @@ omz_plugins(){
 
 omp()
 {
-    info "Oh My Posh Not Found. Installing..."
+    LOG "- Oh My Posh Not Found. Installing."
     [[ ! -d "$HOME/.local/bin" ]] && mkdir -p "$HOME/.local/bin"
     curl -s https://ohmyposh.dev/install.sh | bash -s -- -d "$HOME/.local/bin/" &> /dev/null
 }
 
 omt()
 {
-    info "Oh my tmux not found. Installing..."
+    LOG "- Oh my tmux not found. Installing."
     git clone --single-branch -q https://github.com/gpakosz/.tmux.git ".tmux"
     mkdir -p "$HOME/.config/tmux"
     cp -fa ".tmux/.tmux.conf" ".tmux/.tmux.conf.local" "$HOME/.config/tmux"
@@ -89,20 +89,22 @@ dotfiles()
         local BROWSER=".firefox"
     fi
 
-    info "Copying dotfiles files..."
+    LOG_STEP_IN "- Copying dotfiles files."
     for f in "${FILES[@]}"; do
         if [[ -e "$HOME/.config/$f" ]]; then
             mv -f "$HOME/.config/$f" "$BACKUP_DIR"
         fi
-        echo "- Copying $f"
+        LOG "- Copying $f"
         cp -rfa "$f" "$HOME/.config"
     done
 
     [[ -f "$HOME/.zshrc" ]] && mv -f "$HOME/.zshrc" "$BACKUP_DIR/zshrc"
 
     mv -f "$HOME/.config/zsh/zshrc" "$HOME/.zshrc"
+    LOG_STEP_OUT
 
     if [[ -n $BROWSER ]]; then
+        LOG "- Adding custom css for $BROWSER"
         local DIR="$(find "$HOME/$BROWSER" -type d -name "*default-release*" -print -quit)"
         if [[ ! -d "$DIR/chrome" ]]; then
             if ! grep -q 'toolkit\.legacyUserProfileCustomizations\.stylesheets.*true' "$DIR/prefs.js"; then
