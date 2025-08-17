@@ -32,8 +32,8 @@ solvo-vid()
 # ]
 
 # Android SDK
-if [[ -d "$HOME/Android/Sdk" ]]; then
-    export ANDROID_HOME="$HOME/Android/Sdk"
+if [[ -d "$HOME/android/sdk" ]]; then
+    export ANDROID_HOME="$HOME/android/sdk"
 fi
 
 # Exports
