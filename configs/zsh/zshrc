@@ -136,6 +136,7 @@ alias gmr="git merge -S --signoff --log"
 alias gms="git merge --skip"
 alias gma="git merge --abort"
 alias gre="git restore"
+alias glo="git --no-pager log --oneline"
 
 # Zsh shortcuts
 alias zshrc="$EDITOR $HOME/.zshrc"
