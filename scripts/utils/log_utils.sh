@@ -88,3 +88,13 @@ LOG_STEP_OUT()
         export INDENT_LEVEL=$((INDENT - 2))
     fi
 }
+
+# ABORT <message>
+# Stops the build process, additionally prints a log message if supplied.
+ABORT()
+{
+    if [ "$1" ]; then
+        LOGE "$1"
+    fi
+    return 1
+}
