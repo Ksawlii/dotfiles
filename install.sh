@@ -41,7 +41,7 @@ unset BROWSER
 export PARENT_NAME=$(basename "$0")
 
 if [[ "$EUID" -eq 0 ]]; then
-    LOGE "This script should not be run as root. Please run it as a regular user."
+    ABORT "This script should not be run as root. Please run it as a regular user."
 fi
 
 while [ "$#" != 0 ]; do
@@ -52,7 +52,7 @@ while [ "$#" != 0 ]; do
         exit 1
     else
         if [[ "$1" == "-"* ]]; then
-            LOGE "Unknown option: $1"
+            ABORT "Unknown option: $1"
         fi
         PRINT_USAGE
         exit 1
@@ -66,7 +66,7 @@ if [[ -f "/etc/doas.conf" ]] && CHECK_EXEC "doas"; then
 elif CHECK_EXEC "sudo"; then
     export ROOT="sudo"
 else
-    LOGE "Doas and sudo not found. Install doas or sudo!"
+    ABORT "Doas and sudo not found. Install doas or sudo!"
 fi
 
 LOG_STEP_IN true "Installing dependencies"

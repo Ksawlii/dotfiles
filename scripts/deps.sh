@@ -178,7 +178,7 @@ if [[ "$1" = "Gentoo" ]]; then
 elif [[ "$1" = "Arch Linux" ]]; then
     SETUP_ARCH
 else
-    LOGE "Your Distro is not supported ($1)"
+    ABORT "Your Distro is not supported ($1)"
 fi
 
 exit 0
