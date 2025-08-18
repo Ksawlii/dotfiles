@@ -21,7 +21,8 @@ if [[ "$PARENT_NAME" != "install.sh" ]]; then
     exit 1
 fi
 
-source "$SRC_DIR/scripts/utils/log_utils.sh"
+source "$SRC_DIR/scripts/utils/common_utils.sh" || exit 1
+source "$SRC_DIR/scripts/utils/log_utils.sh" || exit 1
 
 # [
 SETUP_ARCH()
@@ -52,7 +53,7 @@ SETUP_ARCH()
     fi
 
     if ! grep -q "^\[multilib\]" "/etc/pacman.conf"; then
-        echo -e "\n[multilib]\nInclude = /etc/pacman.d/mirrorlist" | $ROOT tee -a "/etc/pacman.conf"
+        echo -e "\n[multilib]\nInclude = /etc/pacman.d/mirrorlist" | $ROOT tee -a "/etc/pacman.conf" >/dev/null
     fi
 
     if ! CHECK_EXEC "yay"; then
@@ -113,7 +114,7 @@ SETUP_GENTOO()
         fi
     fi
 
-    $ROOT emerge -q --sync
+    EVAL "$ROOT emerge -q --sync"
 
     if ! CHECK_EXEC "equery"; then
         LOG "- equery not found. Installing."
@@ -124,11 +125,13 @@ SETUP_GENTOO()
         EVAL "$ROOT emerge -nvq eselect-repository"
     fi
 
-    for r in "${REPOS[@]}"; do
-        if ! grep -q "^\[[$r\]]" "/etc/portage/repos.conf/eselect-repo.conf"; then
-            EVAL "$ROOT eselect repository enable \"$r\""
-        fi
-    done
+    if [[ -f "/etc/portage/repos.conf/eselect-repo.conf" ]]; then
+        for r in "${REPOS[@]}"; do
+            if ! grep -q "^\[[$r\]]" "/etc/portage/repos.conf/eselect-repo.conf"; then
+                EVAL "$ROOT eselect repository enable \"$r\""
+            fi
+        done
+    fi
 
     for d in "${DEPS[@]}"; do
         if ! equery list "$d" > /dev/null 2>&1; then
@@ -143,9 +146,9 @@ SETUP_GENTOO()
         fi
     done
 
-    if [[ "${#MISSING[[@]]}" -gt 0 ]]; then
+    if [[ "${#MISSING[@]}" -gt 0 ]]; then
         LOG "- Installing dependencies."
-        EVAL "$ROOT emerge -nvq \"${MISSING[[@]]}\""
+        EVAL "$ROOT emerge -nvq \"${MISSING[@]}\""
     else
         LOG "- Nevermind, looks like you got every dependency already"
     fi
