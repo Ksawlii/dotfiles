@@ -1,0 +1,20 @@
+name: Test install
+
+on:
+  workflow_dispatch:
+  pull_request:
+  push:
+
+jobs:
+  dotfiles:
+    runs-on: ubuntu-latest
+
+    container:
+      image: archlinux:latest
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Run install script
+        run: |
+          ./install.sh
