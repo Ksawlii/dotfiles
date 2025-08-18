@@ -15,6 +15,14 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
+      - name: Prepare system
+        run: |
+          pacman -Syu --noconfirm sudo
+          useradd -m user
+          echo "user ALL=(ALL) NOPASSWD: ALL" >> /etc/sudoers
+          chown -R user:user $GITHUB_WORKSPACE
+          chown -R user:user /home
+
       - name: Run install script
         run: |
-          ./install.sh --no-fonts
+          su - user -c "cd $GITHUB_WORKSPACE && ./install.sh --no-fonts"
