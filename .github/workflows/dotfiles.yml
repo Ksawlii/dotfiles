@@ -17,4 +17,4 @@ jobs:
 
       - name: Run install script
         run: |
-          ./install.sh
+          ./install.sh --no-fonts
