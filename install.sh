@@ -27,12 +27,39 @@ source "env.sh"
 source "$SRC_DIR/scripts/utils/common_utils.sh" || exit 1
 source "$SRC_DIR/scripts/utils/log_utils.sh" || exit 1
 
+# [
+PRINT_USAGE()
+{
+    LOG "Usage: $0 [options]" >&2
+    LOG " --no-fonts : Skip installing fonts (not recommended)" >&2
+}
+# ]
+
+
+NO_FONTS="false"
 unset BROWSER
 export PARENT_NAME=$(basename "$0")
 
 if [[ "$EUID" -eq 0 ]]; then
     LOGE "This script should not be run as root. Please run it as a regular user."
 fi
+
+while [ "$#" != 0 ]; do
+    if [[ "$1" == "--no-fonts" ]]; then
+        NO_FONTS=true
+    elif [[ "$1" == "-h" ]] || [[ "$1" == "--help" ]]; then
+        PRINT_USAGE
+        exit 1
+    else
+        if [[ "$1" == "-"* ]]; then
+            LOGE "Unknown option: $1"
+        fi
+        PRINT_USAGE
+        exit 1
+    fi
+
+    shift
+done
 
 if [[ -f "/etc/doas.conf" ]] && CHECK_EXEC "doas"; then
     export ROOT="doas"
@@ -53,9 +80,11 @@ bash "$SRC_DIR/scripts/dotfiles.sh" || exit 1
 LOG_STEP_OUT
 
 # Fonts
-LOG_STEP_IN true "Setting up fonts"
-bash "$SRC_DIR/scripts/fonts.sh" || exit 1
-LOG_STEP_OUT
+if [[ "$NO_FONTS" != "true" ]]; then
+    LOG_STEP_IN true "Setting up fonts"
+    bash "$SRC_DIR/scripts/fonts.sh" || exit 1
+    LOG_STEP_OUT 
+fi
 
 echo -e '\n\033[1;32m'"Dotfiles are installed. Please reboot!"
 
