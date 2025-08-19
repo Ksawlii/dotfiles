@@ -29,7 +29,7 @@ EVAL()
 {
     local CMD="$1"
 
-    local OUT="$(eval "$CMD" 2>&1)"
+    local OUT="$( (eval "$CMD") 2>&1 )"
     # shellcheck disable=SC2181,SC2291
     if [[ $? -ne 0 ]]; then
         LOGE "Command returned a non-zero exit code\n"
