@@ -6,7 +6,7 @@ on:
   push:
 
 jobs:
-  dotfiles:
+  arch:
     runs-on: ubuntu-latest
 
     container:
