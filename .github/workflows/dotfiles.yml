@@ -26,3 +26,25 @@ jobs:
       - name: Run install script
         run: |
           su - user -c "cd $GITHUB_WORKSPACE && ./install.sh"
+
+  gentoo:
+    runs-on: ubuntu-latest
+
+    container:
+      image: gentoo/stage3:latest
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Prepare system
+        run: |
+          emerge-webrsync &>/dev/null
+          emerge -nvq sudo >/dev/null
+          useradd -m user
+          echo "user ALL=(ALL) NOPASSWD: ALL" >> /etc/sudoers
+          chown -R user:user $GITHUB_WORKSPACE
+          chown -R user:user /home
+
+      - name: Run install script
+        run: |
+          su - user -c "cd $GITHUB_WORKSPACE && ./install.sh"
