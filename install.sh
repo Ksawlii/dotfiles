@@ -71,18 +71,18 @@ fi
 
 LOG_STEP_IN true "Installing dependencies"
 DISTRO="$(grep '^NAME=' "/etc/os-release" | cut -d= -f2 | tr -d '"')"
-bash "$SRC_DIR/scripts/deps.sh" "$DISTRO" || exit 1
+bash -e "$SRC_DIR/scripts/deps.sh" "$DISTRO" || exit 1
 LOG_STEP_OUT
 
 # Dotfiles
 LOG_STEP_IN true "Setting up dotfiles"
-bash "$SRC_DIR/scripts/dotfiles.sh" || exit 1
+bash -e "$SRC_DIR/scripts/dotfiles.sh" || exit 1
 LOG_STEP_OUT
 
 # Fonts
 if [[ "$NO_FONTS" != "true" ]]; then
     LOG_STEP_IN true "Setting up fonts"
-    bash "$SRC_DIR/scripts/fonts.sh" || exit 1
+    bash -e "$SRC_DIR/scripts/fonts.sh" || exit 1
     LOG_STEP_OUT 
 fi
 
