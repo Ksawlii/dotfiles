@@ -31,8 +31,8 @@ GET_OMZ()
     export RUNZSH=no
     export CHSH=no
     export USER="$(whoami)"
-    sh -c "$(curl -fsSL https://raw.githubusercontent.com/ohmyzsh/ohmyzsh/master/tools/install.sh)" "" --unattended &> /dev/null
-    $ROOT chsh -s /bin/zsh "$USER"
+    EVAL "sh -c \"$(curl -fsSL https://raw.githubusercontent.com/ohmyzsh/ohmyzsh/master/tools/install.sh)\" \"\" --unattended"
+    EVAL "$ROOT chsh -s /bin/zsh \"$USER\""
     unset RUNZSH CHSH
     LOG_STEP_OUT
 }
@@ -46,7 +46,7 @@ GET_OMZ_PLUGINS(){
     for p in "${PLUGINS[@]}"; do
         if [[ ! -d "$HOME/.oh-my-zsh/custom/plugins/$p" ]]; then
             LOG "- $p plugin not found. Installing..."
-            git clone -q "https://github.com/zsh-users/$p" "$HOME/.oh-my-zsh/custom/plugins/$p"
+            EVAL "git clone \"https://github.com/zsh-users/$p\" \"$HOME/.oh-my-zsh/custom/plugins/$p\""
         fi
     done
 }
@@ -55,13 +55,13 @@ GET_OMP()
 {
     LOG "- Oh My Posh Not Found. Installing."
     [[ ! -d "$HOME/.local/bin" ]] && mkdir -p "$HOME/.local/bin"
-    curl -s https://ohmyposh.dev/install.sh | bash -s -- -d "$HOME/.local/bin/" &> /dev/null
+    EVAL "curl -s \"https://ohmyposh.dev/install.sh\" | bash -s -- -d \"$HOME/.local/bin/\""
 }
 
 GET_OMT()
 {
     LOG "- Oh my tmux not found. Installing."
-    git clone --single-branch -q https://github.com/gpakosz/.tmux.git ".tmux"
+    EVAL "git clone --single-branch https://github.com/gpakosz/.tmux.git \".tmux\""
     mkdir -p "$HOME/.config/tmux"
     cp -fa ".tmux/.tmux.conf" ".tmux/.tmux.conf.local" "$HOME/.config/tmux"
     rm -rf ".tmux"
@@ -88,15 +88,15 @@ GET_DOTFILES()
     LOG_STEP_IN "- Copying dotfiles files."
     for f in "${FILES[@]}"; do
         if [[ -e "$HOME/.config/$f" ]]; then
-            mv -f "$HOME/.config/$f" "$BACKUP_DIR"
+            EVAL "mv -fv \"$HOME/.config/$f\" \"$BACKUP_DIR\""
         fi
         LOG "- Copying $f"
-        cp -rfa "$f" "$HOME/.config"
+        EVAL "cp -rfav \"$f\" \"$HOME/.config\""
     done
 
-    [[ -f "$HOME/.zshrc" ]] && mv -f "$HOME/.zshrc" "$BACKUP_DIR/zshrc"
+    [[ -f "$HOME/.zshrc" ]] && EVAL "mv -fv \"$HOME/.zshrc\" \"$BACKUP_DIR/zshrc\""
 
-    mv -f "$HOME/.config/zsh/zshrc" "$HOME/.zshrc"
+    EVAL "mv -fv \"$HOME/.config/zsh/zshrc\" \"$HOME/.zshrc\""
     LOG_STEP_OUT
 }
 
@@ -117,7 +117,7 @@ GET_BROWSER_CSS()
             fi
         fi
         echo 'user_pref("toolkit.legacyUserProfileCustomizations.stylesheets", true);' >> "$DIR/prefs.js"
-        git clone -q "https://github.com/alfaaarex/keyfox.git" "$DIR/chrome"
+        EVAL "git clone https://github.com/alfaaarex/keyfox.git \"$DIR/chrome\""
     fi
 }
 # ]

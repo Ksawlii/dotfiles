@@ -57,20 +57,22 @@ SETUP_ARCH()
 
     if ! CHECK_EXEC "yay"; then
         echo -e ""
-        LOG_STEP_IN "- Yay not installed. Installing yay (AUR helper)..."
-        $ROOT pacman -S --needed base-devel git
+        LOG_STEP_IN "- Yay not installed. Installing yay (AUR helper)"
+        EVAL "$ROOT pacman -Sy --needed --noconfirm base-devel git"
+        LOG "- Cloning yay"
         git clone -q "https://aur.archlinux.org/yay.git" "$HOME/.yay"
         cd "$HOME/.yay"
-        makepkg -si >/dev/null
+        LOG "- Building yay"
+        EVAL "makepkg -si --noconfirm"
         rm -rf "$HOME/.yay"
         LOG_STEP_OUT
     fi
 
     LOG "- Running a full system update with yay"
-    yay -Syyuu --needed --noconfirm
+    EVAL "yay -Syyuu --needed --noconfirm"
 
     LOG "- Installing dependencies"
-    yay -S --needed --noconfirm "$DEPS"
+    EVAL "yay -S --needed --noconfirm \"$DEPS\""
 }
 
 SETUP_GENTOO()
@@ -115,16 +117,16 @@ SETUP_GENTOO()
 
     if ! CHECK_EXEC "equery"; then
         LOG "- equery not found. Installing."
-        $ROOT emerge -avq app-portage/gentoolkit
+        EVAL "$ROOT emerge -nvq app-portage/gentoolkit"
     fi
     if ! eselect "repository" &> /dev/null; then
         LOG "- eselect-repository not found. Installing. "
-        $ROOT emerge -navq eselect-repository
+        EVAL "$ROOT emerge -nvq eselect-repository"
     fi
 
     for r in "${REPOS[@]}"; do
         if ! grep -q "^\[[$r\]]" "/etc/portage/repos.conf/eselect-repo.conf"; then
-            $ROOT eselect repository enable "$r"
+            EVAL "$ROOT eselect repository enable \"$r\""
         fi
     done
 
@@ -143,7 +145,7 @@ SETUP_GENTOO()
 
     if [[ "${#MISSING[[@]]}" -gt 0 ]]; then
         LOG "- Installing dependencies."
-        $ROOT emerge -avq "${MISSING[[@]]}"
+        EVAL "$ROOT emerge -nvq \"${MISSING[[@]]}\""
     else
         LOG "- Nevermind, looks like you got every dependency already"
     fi

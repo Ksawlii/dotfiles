@@ -33,15 +33,15 @@ GET_NERD(){
           )
 
     LOG "- Cloning nerd fonts."
-    git clone -j$(nproc --all) --depth=1 -q "https://github.com/ryanoasis/nerd-fonts.git" "$HOME/nerd-fonts"
+    EVAL "git clone -j$(nproc --all) --depth=1 --single-branch https://github.com/ryanoasis/nerd-fonts.git \"$HOME/nerd-fonts\""
     cd "$HOME/nerd-fonts"
     LOG "- Installing nerd fonts."
-    bash install.sh &>/dev/null
+    EVAL "bash \"install.sh\""
 
     for f in "${EXTRA_FONTS[@]}"; do
-        wget -q "https://github.com/romkatv/powerlevel10k-media/raw/master/$f"
+        EVAL "wget \"https://github.com/romkatv/powerlevel10k-media/raw/master/$f\""
     done
-    mv "MesloLGS NF "* "$HOME/.local/share/fonts/NerdFonts"
+    EVAL "mv -fv \"MesloLGS NF \"* \"$HOME/.local/share/fonts/NerdFonts\""
     cd "$SRC_DIR"
     rm -rf "$HOME/nerd-fonts"
     LOG "- Installed nerd fonts"
