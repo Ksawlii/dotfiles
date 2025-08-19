@@ -16,6 +16,8 @@
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #
 
+set -e
+
 if [[ "$PARENT_NAME" != "install.sh" ]]; then
     echo "Please use the install.sh script in the root dir."
     exit 1
