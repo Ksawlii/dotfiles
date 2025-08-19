@@ -25,4 +25,4 @@ jobs:
 
       - name: Run install script
         run: |
-          su - user -c "cd $GITHUB_WORKSPACE && ./install.sh --no-fonts"
+          su - user -c "cd $GITHUB_WORKSPACE && ./install.sh"
