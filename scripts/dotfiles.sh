@@ -92,13 +92,12 @@ GET_DOTFILES()
         if [[ -e "$HOME/.config/$f" ]]; then
             EVAL "mv -fv \"$HOME/.config/$f\" \"$BACKUP_DIR\""
         fi
+        [[ -f "$HOME/.zshrc" ]] && EVAL "mv -fv \"$HOME/.zshrc\" \"$BACKUP_DIR/zshrc\""
         LOG "- Copying $f"
-        EVAL "cp -rfav \"$f\" \"$HOME/.config\""
+        DIR="$HOME/.config"
+        [[ "$f" == "zshrc" ]] && DIR="$HOME/.zshrc"
+        EVAL "cp -rfav \"$f\" \"$DIR\""
     done
-
-    [[ -f "$HOME/.zshrc" ]] && EVAL "mv -fv \"$HOME/.zshrc\" \"$BACKUP_DIR/zshrc\""
-
-    EVAL "mv -fv \"$HOME/.config/zsh/zshrc\" \"$HOME/.zshrc\""
     LOG_STEP_OUT
 }
 
