@@ -71,6 +71,7 @@ require("lazy").setup({
     { "ya2s/nvim-cursorline" },
     { "romgrk/barbar.nvim" },
     { "WhoIsSethDaniel/mason-tool-installer.nvim", build = ":MasonToolsInstall" },
+    { "MDNSSKNGHT/smali.vim" },
   },
   checker = { enabled = false },
 })
