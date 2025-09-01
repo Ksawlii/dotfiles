@@ -11,3 +11,6 @@ source "$ZSH/oh-my-zsh.sh"
 
 # Oh My Posh
 eval "$(oh-my-posh init zsh --config "$HOME/.config/ohmyposh/EDM115-newline.omp.json")"
+
+# The Fuck
+eval $(thefuck --alias)

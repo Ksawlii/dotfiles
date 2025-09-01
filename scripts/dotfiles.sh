@@ -121,6 +121,15 @@ GET_BROWSER_CSS()
         EVAL "git clone https://github.com/alfaaarex/keyfox.git \"$DIR/chrome\""
     fi
 }
+
+GET_THEFUCK()
+{
+    local PYTHON_VER="$(python3 --version | cut -d' ' -f2 | cut -d. -f1,2)"
+
+    [[ -f "/usr/lib/python${PYTHON_VER}/EXTERNALLY-MANAGED" ]] && $ROOT rm -f "/usr/lib/python${PYTHON_VER}/EXTERNALLY-MANAGED"
+
+    EVAL "pip install \"git+https://github.com/mcollard0/thefuck@fix-python-313-compatibility\""
+}
 # ]
 
 # Oh My Zsh
