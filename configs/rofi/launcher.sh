@@ -4,7 +4,7 @@
 ## Github : @adi1090x
 #
 ## Mod by: ksawlii
-## Github: @Ksawlii
+## Github: @Majaahh
 #
 ## Rofi   : Launcher (Modi Drun, Run, File Browser, Window)
 
