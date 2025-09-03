@@ -23,7 +23,7 @@ if [[ ! -f "env.sh" ]]; then
     exit 1
 fi
 
-source "env.sh"
+source "env.sh" || exit 1
 source "$SRC_DIR/scripts/utils/common_utils.sh" || exit 1
 source "$SRC_DIR/scripts/utils/log_utils.sh" || exit 1
 
@@ -71,18 +71,18 @@ fi
 
 LOG_STEP_IN true "Installing dependencies"
 DISTRO="$(grep '^NAME=' "/etc/os-release" | cut -d= -f2 | tr -d '"')"
-bash -e "$SRC_DIR/scripts/deps.sh" "$DISTRO" || exit 1
+"$SRC_DIR/scripts/deps.sh" "$DISTRO" || exit 1
 LOG_STEP_OUT
 
 # Dotfiles
 LOG_STEP_IN true "Setting up dotfiles"
-bash -e "$SRC_DIR/scripts/dotfiles.sh" || exit 1
+"$SRC_DIR/scripts/dotfiles.sh" || exit 1
 LOG_STEP_OUT
 
 # Fonts
 if [[ "$NO_FONTS" != "true" ]]; then
     LOG_STEP_IN true "Setting up fonts"
-    bash -e "$SRC_DIR/scripts/fonts.sh" || exit 1
+    "$SRC_DIR/scripts/fonts.sh" || exit 1
     LOG_STEP_OUT 
 fi
 
