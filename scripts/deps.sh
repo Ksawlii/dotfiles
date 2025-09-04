@@ -54,9 +54,12 @@ SETUP_ARCH()
         fi
     fi
 
-    if ! grep -q "^\[multilib\]" "/etc/pacman.conf"; then
-        echo -e "\n[multilib]\nInclude = /etc/pacman.d/mirrorlist" | $ROOT tee -a "/etc/pacman.conf" >/dev/null
-    fi
+    for i in "core" "extra" "community" "multilib"; do
+        if ! grep -q "^\[${1}\]" "/etc/pacman.conf"; then
+            echo -e "\n[${1}]\nInclude = /etc/pacman.d/mirrorlist" | $ROOT tee -a "/etc/pacman.conf" >/dev/null
+        fi
+    done
+
 
     if ! CHECK_EXEC "yay"; then
         echo -e ""
