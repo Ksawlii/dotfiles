@@ -72,10 +72,10 @@ SETUP_ARCH()
     fi
 
     LOG "- Running a full system update with yay"
-    EVAL "yay -Syyuu --needed --noconfirm"
+    yay -Syyuu --needed --noconfirm
 
     LOG "- Installing dependencies"
-    EVAL "yay -S --needed --noconfirm \"$DEPS\""
+    yay -S --needed --noconfirm "$DEPS"
 }
 
 SETUP_GENTOO()
@@ -130,7 +130,7 @@ SETUP_GENTOO()
     if [[ -f "/etc/portage/repos.conf/eselect-repo.conf" ]]; then
         for r in "${REPOS[@]}"; do
             if ! grep -q "^\[[$r\]]" "/etc/portage/repos.conf/eselect-repo.conf"; then
-                EVAL "$ROOT eselect repository enable \"$r\""
+                $ROOT eselect repository enable "$r"
             fi
         done
     fi
@@ -150,7 +150,7 @@ SETUP_GENTOO()
 
     if [[ "${#MISSING[@]}" -gt 0 ]]; then
         LOG "- Installing dependencies."
-        EVAL "$ROOT emerge -nvq \"${MISSING[@]}\""
+        $ROOT emerge -nvq "${MISSING[@]}"
     else
         LOG "- Nevermind, looks like you got every dependency already"
     fi
